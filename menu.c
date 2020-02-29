@@ -56,6 +56,32 @@ int main()
         case 'G':
             menu_driver(my_menu, REQ_LAST_ITEM);
             break;
+
+        /* search in menu */
+        case 'n':
+            menu_driver(my_menu, REQ_NEXT_MATCH);
+            break;
+        case 'p':
+            menu_driver(my_menu, REQ_PREV_MATCH);
+            break;
+        case '/': /* append to pattern match buffer */
+            mvaddch(LINES-3, 0, '/');
+            while ((c = getch()) != '\n') {
+                if (c == KEY_BACKSPACE) {
+                    menu_driver(my_menu, REQ_BACK_PATTERN);
+                    continue;
+                }
+                menu_driver(my_menu, c); /* TODO: check c */
+
+                move(LINES-3, 1);
+                clrtoeol();
+                mvaddstr(LINES-3, 1, menu_pattern(my_menu));
+            }
+
+            move(LINES-3, 0);
+            clrtoeol();
+            refresh();
+            break;
         }
 
         move(2, 40);
