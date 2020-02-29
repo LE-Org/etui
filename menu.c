@@ -41,6 +41,7 @@ void release()
 
 int main(int argc, char *argv[])
 {
+    WINDOW *win_menu, *win_main, *win_stat;
     ITEM **my_items;
     int c;
     MENU *my_menu;
@@ -58,15 +59,25 @@ int main(int argc, char *argv[])
     noecho();
     keypad(stdscr, TRUE);
 
+    /* define window dimensions */
+    win_menu = newwin(LINES-3, 40, 0, 0);
+    win_main = newwin(LINES-3, COLS-40, 0, 40);
+    win_stat = newwin(3, COLS, LINES-3, 0);
+
+    /* create items */
     n_choices = npvs;
     my_items = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
     for (i = 0; i < n_choices; ++i)
         my_items[i] = new_item(pvs[i], "");
     my_items[n_choices] = (ITEM *)NULL;
 
+    /* create menu */
     my_menu = new_menu((ITEM **)my_items);
-    mvprintw(LINES - 2, 0, "Press q to Exit");
+    set_menu_win(my_menu, win_menu);
+    set_menu_sub(my_menu, derwin(win_menu,10,20,5,5));
+    set_menu_mark(my_menu, "-");
     post_menu(my_menu);
+
     refresh();
 
     while ((c = getch()) != 'q') {
@@ -92,28 +103,37 @@ int main(int argc, char *argv[])
             menu_driver(my_menu, REQ_PREV_MATCH);
             break;
         case '/': /* append to pattern match buffer */
-            mvaddch(LINES-3, 0, '/');
             while ((c = getch()) != '\n') {
+                mvwaddch(win_menu, 1, 1, '/');
                 if (c == KEY_BACKSPACE) {
                     menu_driver(my_menu, REQ_BACK_PATTERN);
-                    continue;
+                } else {
+                    menu_driver(my_menu, c); /* TODO: check c */
                 }
-                menu_driver(my_menu, c); /* TODO: check c */
 
-                move(LINES-3, 1);
-                clrtoeol();
-                mvaddstr(LINES-3, 1, menu_pattern(my_menu));
+                wmove(win_menu, 1, 2);
+                wclrtoeol(win_menu);
+                box(win_menu, 0, 0);
+                mvwaddstr(win_menu, 1, 2, menu_pattern(my_menu));
+                wrefresh(win_menu);
             }
 
-            move(LINES-3, 0);
-            clrtoeol();
-            refresh();
+            wmove(win_menu, 1, 1);
+            wclrtoeol(win_menu);
             break;
         }
+        box(win_menu, 0, 0);
+        wrefresh(win_menu);
 
-        move(2, 40);
-        clrtoeol();
-        mvaddstr(2, 40, item_name(current_item(my_menu)));
+        wmove(win_main, 1, 1);
+        wclrtoeol(win_main);
+        mvwaddstr(win_main, 1, 1, item_name(current_item(my_menu)));
+        box(win_main, 0, 0);
+        wrefresh(win_main);
+
+        mvwprintw(win_stat,1,2,"Press %c to Exit", 'q');
+        box(win_stat, 0, 0);
+        wrefresh(win_stat);
     }
 
     for (i = 0; i < n_choices; ++i)
