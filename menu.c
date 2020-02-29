@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     ITEM **my_items;
     int c;
     MENU *my_menu;
-    int n_choices, i;
+    int i;
     FILE *file;
 
     if (argc != 2 || (file = fopen(argv[1], "r")) == NULL) {
@@ -65,11 +65,10 @@ int main(int argc, char *argv[])
     win_stat = newwin(3, COLS, LINES-3, 0);
 
     /* create items */
-    n_choices = npvs;
-    my_items = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
-    for (i = 0; i < n_choices; ++i)
+    my_items = (ITEM **)calloc(npvs + 1, sizeof(ITEM *));
+    for (i = 0; i < npvs; ++i)
         my_items[i] = new_item(pvs[i], "");
-    my_items[n_choices] = (ITEM *)NULL;
+    my_items[npvs] = (ITEM *)NULL;
 
     /* create menu */
     my_menu = new_menu((ITEM **)my_items);
@@ -136,7 +135,7 @@ int main(int argc, char *argv[])
         wrefresh(win_stat);
     }
 
-    for (i = 0; i < n_choices; ++i)
+    for (i = 0; i < npvs; ++i)
         free_item(my_items[i]);
     free(my_items);
 
