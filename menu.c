@@ -42,16 +42,14 @@ int main()
     post_menu(my_menu);
     refresh();
 
-    while ((c = getch()) != 'q')
-    {
-        switch(c)
-        {
-            case KEY_DOWN: case 'j':
-                menu_driver(my_menu, REQ_DOWN_ITEM);
-                break;
-            case KEY_UP: case 'k':
-                menu_driver(my_menu, REQ_UP_ITEM);
-                break;
+    while ((c = getch()) != 'q') {
+        switch(c) {
+        case KEY_DOWN: case 'j':
+            menu_driver(my_menu, REQ_DOWN_ITEM);
+            break;
+        case KEY_UP: case 'k':
+            menu_driver(my_menu, REQ_UP_ITEM);
+            break;
         }
         mvaddstr(2, 40, item_name(current_item(my_menu)));
     }
