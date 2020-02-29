@@ -50,6 +50,12 @@ int main()
         case KEY_UP: case 'k':
             menu_driver(my_menu, REQ_UP_ITEM);
             break;
+        case 'g':
+            menu_driver(my_menu, REQ_FIRST_ITEM);
+            break;
+        case 'G':
+            menu_driver(my_menu, REQ_LAST_ITEM);
+            break;
         }
         mvaddstr(2, 40, item_name(current_item(my_menu)));
     }
