@@ -53,6 +53,7 @@ int main()
                 menu_driver(my_menu, REQ_UP_ITEM);
                 break;
         }
+        mvaddstr(2, 40, item_name(current_item(my_menu)));
     }
 
     for (i = 0; i < n_choices; ++i)
