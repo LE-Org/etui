@@ -38,18 +38,18 @@ int main()
     my_items[n_choices] = (ITEM *)NULL;
 
     my_menu = new_menu((ITEM **)my_items);
-    mvprintw(LINES - 2, 0, "F1 to Exit");
+    mvprintw(LINES - 2, 0, "Press q to Exit");
     post_menu(my_menu);
     refresh();
 
-    while ((c = getch()) != KEY_F(1))
+    while ((c = getch()) != 'q')
     {
         switch(c)
         {
-            case KEY_DOWN:
+            case KEY_DOWN: case 'j':
                 menu_driver(my_menu, REQ_DOWN_ITEM);
                 break;
-            case KEY_UP:
+            case KEY_UP: case 'k':
                 menu_driver(my_menu, REQ_UP_ITEM);
                 break;
         }
