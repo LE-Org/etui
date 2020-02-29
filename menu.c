@@ -1,40 +1,67 @@
-#include <stdlib.h>
+#include <stdio.h>  // getline
+#include <stdlib.h> // malloc, realloc
+#include <string.h> // strncpy
 
 #include <curses.h>
 #include <menu.h>
 
-#define NELEMS(a) (sizeof(a) / sizeof(a[0]))
+int npvs = 0;
+char **pvs = NULL;
 
-char *pvs[] = {
-    "EX:AAA",
-    "EX:BBB",
-    "EX:CCC",
-    "EX:DDD",
-};
+int process_input_file(FILE *file)
+{
+    int i;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t nread;
+    char *buf;
 
-char *desc[] = {
-    "aaa",
-    "bbb",
-    "ccc",
-    "ddd",
-};
+    while ((nread = getline(&line, &len, file)) != -1) {
+        for (i = 0; i < nread; ++i)
+            if (line[i] == '\n' || line[i] == ' ')
+                break;
 
-int main()
+        buf = malloc(i+1);
+        strncpy(buf, line, i);
+        buf[i] = '\0';
+
+        pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
+        pvs[npvs++] = buf;
+    }
+    free(line);
+}
+
+void release()
+{
+    int i;
+    for (i = 0; i < npvs; ++i)
+        free(pvs[i]);
+    free(pvs);
+}
+
+int main(int argc, char *argv[])
 {
     ITEM **my_items;
     int c;
     MENU *my_menu;
     int n_choices, i;
+    FILE *file;
+
+    if (argc != 2 || (file = fopen(argv[1], "r")) == NULL) {
+        return -1;
+    }
+    process_input_file(file);
+    fclose(file);
 
     initscr();
     timeout(10);
     noecho();
     keypad(stdscr, TRUE);
 
-    n_choices = NELEMS(pvs);
+    n_choices = npvs;
     my_items = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
     for (i = 0; i < n_choices; ++i)
-        my_items[i] = new_item(pvs[i], desc[i]);
+        my_items[i] = new_item(pvs[i], "");
     my_items[n_choices] = (ITEM *)NULL;
 
     my_menu = new_menu((ITEM **)my_items);
@@ -97,4 +124,5 @@ int main()
     free_menu(my_menu);
 
     endwin();
+    release();
 }
