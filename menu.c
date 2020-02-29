@@ -57,6 +57,9 @@ int main()
             menu_driver(my_menu, REQ_LAST_ITEM);
             break;
         }
+
+        move(2, 40);
+        clrtoeol();
         mvaddstr(2, 40, item_name(current_item(my_menu)));
     }
 
