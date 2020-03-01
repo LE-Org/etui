@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
     while ((c = getch()) != 'q') {
         if (active_win == WMENU) {
-            switch(c) {
+            switch (c) {
             /* menu movement */
             case KEY_DOWN: case 'j':
                 menu_driver(menu, REQ_DOWN_ITEM);
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        switch(c) {
+        switch (c) {
         /* select active win */
         case '\t':
             active_win = (active_win == WMENU) ? WMAIN : WMENU;
