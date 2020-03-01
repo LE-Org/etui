@@ -93,7 +93,7 @@ void wmenu_search(WINDOW *win_menu, MENU *menu)
 int main(int argc, char *argv[])
 {
     WINDOW *win_menu, *win_main, *win_stat;
-    ITEM **my_items;
+    ITEM **mitems;
     int c;
     MENU *menu;
     int i;
@@ -121,13 +121,13 @@ int main(int argc, char *argv[])
     win_stat = newwin(3, COLS, LINES-3, 0);
 
     /* create items */
-    my_items = (ITEM **)calloc(npvs + 1, sizeof(ITEM *));
+    mitems = (ITEM **)calloc(npvs + 1, sizeof(ITEM *));
     for (i = 0; i < npvs; ++i)
-        my_items[i] = new_item(pvs[i], "");
-    my_items[npvs] = (ITEM *)NULL;
+        mitems[i] = new_item(pvs[i], "");
+    mitems[npvs] = (ITEM *)NULL;
 
     /* create menu */
-    menu = new_menu((ITEM **)my_items);
+    menu = new_menu((ITEM **)mitems);
     set_menu_win(menu, win_menu);
     set_menu_sub(menu, derwin(win_menu,10,20,5,5));
     set_menu_mark(menu, "-");
@@ -190,8 +190,8 @@ int main(int argc, char *argv[])
     }
 
     for (i = 0; i < npvs; ++i)
-        free_item(my_items[i]);
-    free(my_items);
+        free_item(mitems[i]);
+    free(mitems);
 
     unpost_menu(menu);
     free_menu(menu);
