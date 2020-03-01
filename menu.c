@@ -15,11 +15,11 @@ enum e_wins { WMENU, WMAIN, WSTAT } active_win;
 
 int process_input_file(FILE *file)
 {
-    int i;
     char *line = NULL;
     size_t len = 0;
     ssize_t nread;
     char *buf;
+    int i;
 
     while ((nread = getline(&line, &len, file)) != -1) {
         for (i = 0; i < nread; ++i)
@@ -94,12 +94,12 @@ void wmenu_search(WINDOW *win_menu, MENU *menu)
 
 int main(int argc, char *argv[])
 {
+    FILE *file;
     WINDOW *win_menu, *win_main, *win_stat;
-    ITEM **mitems;
     int c;
     MENU *menu;
+    ITEM **mitems;
     int i;
-    FILE *file;
 
     if (argc != 2 || (file = fopen(argv[1], "r")) == NULL) {
         return -1;
