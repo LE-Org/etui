@@ -27,21 +27,18 @@ int process_input_file(FILE *file)
                 break;
 
         buf = malloc(i+1);
-        if (buf == NULL)
-            goto alloc_err;
         strncpy(buf, line, i);
         buf[i] = '\0';
 
         pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
-        if (pvs == NULL)
-            goto alloc_err;
-        pvs[npvs] = buf;
         vals = realloc(vals, (npvs + 1) * sizeof(int *));
-        if (vals == NULL)
-            goto alloc_err;
+
+        pvs[npvs] = buf;
         vals[npvs] = malloc(sizeof(int));
-        if (vals[npvs] == NULL)
+
+        if (buf == NULL || pvs == NULL || vals == NULL || vals[npvs] == NULL)
             goto alloc_err;
+
         ++npvs;
     }
     free(line);
