@@ -9,6 +9,8 @@ int npvs = 0;
 char **pvs = NULL;
 int **vals = NULL;
 
+enum e_wins { WMENU, WMAIN, WSTAT } active_win;
+
 int process_input_file(FILE *file)
 {
     int i;
@@ -63,10 +65,32 @@ void clear_border(WINDOW *w)
     wborder(w, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
 }
 
+void wmenu_search(WINDOW *win_menu, MENU *my_menu)
+{
+    int c;
+    while ((c = getch()) != '\n') {
+        mvwaddch(win_menu, 1, 1, '/');
+        if (c == KEY_BACKSPACE) {
+            menu_driver(my_menu, REQ_BACK_PATTERN);
+        } else {
+            menu_driver(my_menu, c); /* TODO: check c */
+        }
+
+        wmove(win_menu, 1, 2);
+        wclrtoeol(win_menu);
+        (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+        mvwaddstr(win_menu, 1, 2, menu_pattern(my_menu));
+        wrefresh(win_menu);
+    }
+    wmove(win_menu, 1, 1);
+    wclrtoeol(win_menu);
+    (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+}
+
+
 int main(int argc, char *argv[])
 {
     WINDOW *win_menu, *win_main, *win_stat;
-    enum e_wins { WMENU, WMAIN, WSTAT } active_win;
     ITEM **my_items;
     int c;
     MENU *my_menu;
@@ -135,23 +159,7 @@ int main(int argc, char *argv[])
                 menu_driver(my_menu, REQ_PREV_MATCH);
                 break;
             case '/': /* append to pattern match buffer */
-                while ((c = getch()) != '\n') {
-                    mvwaddch(win_menu, 1, 1, '/');
-                    if (c == KEY_BACKSPACE) {
-                        menu_driver(my_menu, REQ_BACK_PATTERN);
-                    } else {
-                        menu_driver(my_menu, c); /* TODO: check c */
-                    }
-
-                    wmove(win_menu, 1, 2);
-                    wclrtoeol(win_menu);
-                    (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
-                    mvwaddstr(win_menu, 1, 2, menu_pattern(my_menu));
-                    wrefresh(win_menu);
-                }
-
-                wmove(win_menu, 1, 1);
-                wclrtoeol(win_menu);
+                wmenu_search(win_menu, my_menu);
                 break;
             }
         }
