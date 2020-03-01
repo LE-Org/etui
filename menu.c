@@ -135,6 +135,12 @@ int main(int argc, char *argv[])
         wclrtoeol(win_main);
         mvwaddstr(win_main, 1, 1, item_name(current_item(my_menu)));
         box(win_main, 0, 0);
+        wmove(win_main, 2, 1);
+        wclrtoeol(win_main);
+        mvwprintw(win_main, 2, 1, "%d.", item_index(current_item(my_menu)));
+        wmove(win_main, 3, 1);
+        wclrtoeol(win_main);
+        mvwprintw(win_main, 3, 1, "VAL = %d", vals[item_index(current_item(my_menu))]);
         wrefresh(win_main);
 
         mvwprintw(win_stat,1,2,"Press %c to Exit", 'q');
