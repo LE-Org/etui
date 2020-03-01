@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
     timeout(10);
     noecho();
     keypad(stdscr, TRUE);
+    curs_set(0);
 
     /* define window dimensions */
     win_menu = newwin(LINES-3, 40, 0, 0);
