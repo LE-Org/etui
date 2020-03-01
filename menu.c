@@ -4,6 +4,15 @@
 
 #include <menu.h>
 
+#define WMENU_H (LINES - WSTAT_H)
+#define WMENU_W 40
+#define WMAIN_H (LINES - WSTAT_H)
+#define WMAIN_W (COLS - WMENU_W)
+#define WSTAT_H 3
+#define WSTAT_W COLS
+
+#define NC_TIMEOUT 50
+
 static int process_input_file(FILE *);
 static void wmenu_search(WINDOW *, MENU *);
 static void border_if_active(WINDOW *);
@@ -126,15 +135,15 @@ main(int argc, char *argv[])
 
 	/* init ncurses */
 	initscr();
-	timeout(10);
+	timeout(NC_TIMEOUT);
 	noecho();
 	keypad(stdscr, TRUE);
 	curs_set(0);
 
 	/* define window dimensions */
-	win_menu = newwin(LINES-3, 40, 0, 0);
-	win_main = newwin(LINES-3, COLS-40, 0, 40);
-	win_stat = newwin(3, COLS, LINES-3, 0);
+	win_menu = newwin(WMENU_H, WMENU_W, 0, 0);
+	win_main = newwin(WMAIN_H, WMAIN_W, 0, WMENU_W);
+	win_stat = newwin(WSTAT_H, WSTAT_W, WMENU_H, 0);
 
 	/* create items */
 	mitems = (ITEM **)calloc(npvs + 1, sizeof(ITEM *));
