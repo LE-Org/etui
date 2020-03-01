@@ -80,13 +80,15 @@ void wmenu_search(WINDOW *win_menu, MENU *menu)
 
         wmove(win_menu, 1, 2);
         wclrtoeol(win_menu);
-        (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
         mvwaddstr(win_menu, 1, 2, menu_pattern(menu));
+
+        (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
         wrefresh(win_menu);
     }
     wmove(win_menu, 1, 1);
     wclrtoeol(win_menu);
     (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+    wrefresh(win_menu);
 }
 
 
