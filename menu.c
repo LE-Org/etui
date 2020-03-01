@@ -1,22 +1,21 @@
-#include <stdio.h>  // getline
-#include <stdlib.h> // malloc, realloc
-#include <string.h> // strncpy
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include <curses.h>
 #include <menu.h>
 
 #define FIRST_ACTIVE_WIN WMENU
+
+int process_input_file(FILE *);
+void wmenu_search(WINDOW *, MENU *);
+void clear_border(WINDOW *);
+void release(void);
 
 int npvs = 0;
 char **pvs = NULL;
 int **vals = NULL;
 
 enum e_wins { WMENU, WMAIN, WSTAT } active_win;
-
-int process_input_file(FILE *);
-void wmenu_search(WINDOW *, MENU *);
-void clear_border(WINDOW *w);
-void release(void);
 
 int
 process_input_file(FILE *file)
