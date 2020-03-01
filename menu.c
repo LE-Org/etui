@@ -23,16 +23,28 @@ int process_input_file(FILE *file)
                 break;
 
         buf = malloc(i+1);
+        if (buf == NULL)
+            goto alloc_err;
         strncpy(buf, line, i);
         buf[i] = '\0';
 
         pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
+        if (pvs == NULL)
+            goto alloc_err;
         pvs[npvs] = buf;
         vals = realloc(vals, (npvs + 1) * sizeof(int *));
+        if (vals == NULL)
+            goto alloc_err;
         vals[npvs] = malloc(sizeof(int));
+        if (vals[npvs] == NULL)
+            goto alloc_err;
         ++npvs;
     }
     free(line);
+
+    return 0;
+alloc_err:
+    return 1;
 }
 
 void release()
@@ -64,7 +76,11 @@ int main(int argc, char *argv[])
     if (argc != 2 || (file = fopen(argv[1], "r")) == NULL) {
         return -1;
     }
-    process_input_file(file);
+    if (process_input_file(file)) {
+        fclose(file);
+        fprintf(stderr, "Can't process file");
+        return -2;
+    }
     fclose(file);
 
     initscr();
