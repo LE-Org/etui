@@ -170,9 +170,12 @@ int main(int argc, char *argv[])
             active_win = (active_win == WMENU) ? WMAIN : WMENU;
             break;
         }
+
+        /* menu window */
         (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
         wrefresh(win_menu);
 
+        /* main window */
         wclear(win_main);
         mvwaddstr(win_main, 1, 1, item_name(current_item(my_menu)));
         mvwprintw(win_main, 2, 1, "%d.", item_index(current_item(my_menu)));
@@ -180,6 +183,7 @@ int main(int argc, char *argv[])
         (active_win == WMAIN) ? box(win_main, 0, 0) : clear_border(win_main);
         wrefresh(win_main);
 
+        /* status window */
         mvwprintw(win_stat,1,2,"Press %c to Exit", 'q');
         box(win_stat, 0, 0);
         wrefresh(win_stat);
