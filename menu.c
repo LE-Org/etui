@@ -46,9 +46,15 @@ void release()
     free(vals);
 }
 
+void clear_border(WINDOW *w)
+{
+    wborder(w, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+}
+
 int main(int argc, char *argv[])
 {
     WINDOW *win_menu, *win_main, *win_stat;
+    enum e_wins { WMENU, WMAIN, WSTAT } active_win;
     ITEM **my_items;
     int c;
     MENU *my_menu;
@@ -86,61 +92,72 @@ int main(int argc, char *argv[])
 
     refresh();
 
-    while ((c = getch()) != 'q') {
-        switch(c) {
-        case KEY_DOWN: case 'j':
-            menu_driver(my_menu, REQ_DOWN_ITEM);
-            break;
-        case KEY_UP: case 'k':
-            menu_driver(my_menu, REQ_UP_ITEM);
-            break;
-        case 'g':
-            menu_driver(my_menu, REQ_FIRST_ITEM);
-            break;
-        case 'G':
-            menu_driver(my_menu, REQ_LAST_ITEM);
-            break;
+    active_win = WMENU;
 
-        /* search in menu */
-        case 'n':
-            menu_driver(my_menu, REQ_NEXT_MATCH);
-            break;
-        case 'p':
-            menu_driver(my_menu, REQ_PREV_MATCH);
-            break;
-        case '/': /* append to pattern match buffer */
-            while ((c = getch()) != '\n') {
-                mvwaddch(win_menu, 1, 1, '/');
-                if (c == KEY_BACKSPACE) {
-                    menu_driver(my_menu, REQ_BACK_PATTERN);
-                } else {
-                    menu_driver(my_menu, c); /* TODO: check c */
+    while ((c = getch()) != 'q') {
+        if (active_win == WMENU) {
+            switch(c) {
+            case KEY_DOWN: case 'j':
+                menu_driver(my_menu, REQ_DOWN_ITEM);
+                break;
+            case KEY_UP: case 'k':
+                menu_driver(my_menu, REQ_UP_ITEM);
+                break;
+            case 'g':
+                menu_driver(my_menu, REQ_FIRST_ITEM);
+                break;
+            case 'G':
+                menu_driver(my_menu, REQ_LAST_ITEM);
+                break;
+
+            /* search in menu */
+            case 'n':
+                menu_driver(my_menu, REQ_NEXT_MATCH);
+                break;
+            case 'p':
+                menu_driver(my_menu, REQ_PREV_MATCH);
+                break;
+            case '/': /* append to pattern match buffer */
+                while ((c = getch()) != '\n') {
+                    mvwaddch(win_menu, 1, 1, '/');
+                    if (c == KEY_BACKSPACE) {
+                        menu_driver(my_menu, REQ_BACK_PATTERN);
+                    } else {
+                        menu_driver(my_menu, c); /* TODO: check c */
+                    }
+
+                    wmove(win_menu, 1, 2);
+                    wclrtoeol(win_menu);
+                    (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+                    mvwaddstr(win_menu, 1, 2, menu_pattern(my_menu));
+                    wrefresh(win_menu);
                 }
 
-                wmove(win_menu, 1, 2);
+                wmove(win_menu, 1, 1);
                 wclrtoeol(win_menu);
-                box(win_menu, 0, 0);
-                mvwaddstr(win_menu, 1, 2, menu_pattern(my_menu));
-                wrefresh(win_menu);
+                break;
             }
+        }
 
-            wmove(win_menu, 1, 1);
-            wclrtoeol(win_menu);
+        switch(c) {
+        /* select active win */
+        case '\t':
+            active_win = (active_win == WMENU) ? WMAIN : WMENU;
             break;
         }
-        box(win_menu, 0, 0);
+        (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
         wrefresh(win_menu);
 
         wmove(win_main, 1, 1);
         wclrtoeol(win_main);
         mvwaddstr(win_main, 1, 1, item_name(current_item(my_menu)));
-        box(win_main, 0, 0);
         wmove(win_main, 2, 1);
         wclrtoeol(win_main);
         mvwprintw(win_main, 2, 1, "%d.", item_index(current_item(my_menu)));
         wmove(win_main, 3, 1);
         wclrtoeol(win_main);
         mvwprintw(win_main, 3, 1, "VAL = %d", vals[item_index(current_item(my_menu))]);
+        (active_win == WMAIN) ? box(win_main, 0, 0) : clear_border(win_main);
         wrefresh(win_main);
 
         mvwprintw(win_stat,1,2,"Press %c to Exit", 'q');
