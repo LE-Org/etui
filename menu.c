@@ -4,10 +4,10 @@
 
 #include <menu.h>
 
-int process_input_file(FILE *);
-void wmenu_search(WINDOW *, MENU *);
-void border_if_active(WINDOW *);
-void release(void);
+static int process_input_file(FILE *);
+static void wmenu_search(WINDOW *, MENU *);
+static void border_if_active(WINDOW *);
+static void release(void);
 
 int npvs = 0;
 char **pvs = NULL;
@@ -15,7 +15,7 @@ int **vals = NULL;
 
 WINDOW *active_win;
 
-int
+static int
 process_input_file(FILE *file)
 {
 	char *line = NULL;
@@ -51,7 +51,7 @@ alloc_err:
 	return 1;
 }
 
-void
+static void
 wmenu_search(WINDOW *win_menu, MENU *menu)
 {
 	int c;
@@ -80,7 +80,7 @@ wmenu_search(WINDOW *win_menu, MENU *menu)
 	wrefresh(win_menu);
 }
 
-void
+static void
 border_if_active(WINDOW *w)
 {
 	if (w == active_win)
@@ -89,7 +89,7 @@ border_if_active(WINDOW *w)
 		wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
 }
 
-void
+static void
 release(void)
 {
 	int i;
