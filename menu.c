@@ -131,8 +131,6 @@ int main(int argc, char *argv[])
     set_menu_mark(my_menu, "-");
     post_menu(my_menu);
 
-    refresh();
-
     active_win = WMENU;
 
     while ((c = getch()) != 'q') {
