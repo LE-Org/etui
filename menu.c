@@ -78,6 +78,7 @@ void wmenu_search(WINDOW *win_menu, MENU *menu)
             menu_driver(menu, c); /* TODO: check c */
         }
 
+        /* update search field, but leave '/' character alone */
         wmove(win_menu, 1, 2);
         wclrtoeol(win_menu);
         mvwaddstr(win_menu, 1, 2, menu_pattern(menu));
@@ -85,8 +86,11 @@ void wmenu_search(WINDOW *win_menu, MENU *menu)
         (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
         wrefresh(win_menu);
     }
+
+    /* hide search field */
     wmove(win_menu, 1, 1);
     wclrtoeol(win_menu);
+
     (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
     wrefresh(win_menu);
 }
