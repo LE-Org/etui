@@ -5,6 +5,8 @@
 #include <curses.h>
 #include <menu.h>
 
+#define FIRST_ACTIVE_WIN WMENU
+
 int npvs = 0;
 char **pvs = NULL;
 int **vals = NULL;
@@ -131,7 +133,7 @@ int main(int argc, char *argv[])
     set_menu_mark(my_menu, "-");
     post_menu(my_menu);
 
-    active_win = WMENU;
+    active_win = FIRST_ACTIVE_WIN;
 
     while ((c = getch()) != 'q') {
         if (active_win == WMENU) {
