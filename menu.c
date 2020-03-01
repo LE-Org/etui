@@ -36,10 +36,13 @@ process_input_file(FILE *file)
 		pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
 		vals = realloc(vals, (npvs + 1) * sizeof(int *));
 
+		if (buf == NULL || pvs == NULL || vals == NULL)
+			goto alloc_err;
+
 		pvs[npvs] = buf;
 		vals[npvs] = malloc(sizeof(int));
 
-		if (buf == NULL || pvs == NULL || vals == NULL || vals[npvs] == NULL)
+		if (vals[npvs] == NULL)
 			goto alloc_err;
 
 		++npvs;
@@ -181,7 +184,8 @@ main(int argc, char *argv[])
 		switch (c) {
 		/* select active win */
 		case '\t':
-			active_win = (active_win == win_menu) ? win_main : win_menu;
+			active_win = (active_win == win_menu) ?
+			             win_main : win_menu;
 			break;
 		}
 
@@ -192,8 +196,10 @@ main(int argc, char *argv[])
 		/* main window */
 		wclear(win_main);
 		mvwaddstr(win_main, 1, 1, item_name(current_item(menu)));
-		mvwprintw(win_main, 2, 1, "%d.", item_index(current_item(menu)));
-		mvwprintw(win_main, 3, 1, "VAL = %d", vals[item_index(current_item(menu))]);
+		mvwprintw(win_main, 2, 1, "%d.",
+		          item_index(current_item(menu)));
+		mvwprintw(win_main, 3, 1, "VAL = %d",
+		          vals[item_index(current_item(menu))]);
 		border_if_active(win_main);
 		wrefresh(win_main);
 
