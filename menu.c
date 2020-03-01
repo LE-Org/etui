@@ -4,18 +4,16 @@
 
 #include <menu.h>
 
-#define FIRST_ACTIVE_WIN WMENU
-
 int process_input_file(FILE *);
 void wmenu_search(WINDOW *, MENU *);
-void clear_border(WINDOW *);
+void border_if_active(WINDOW *);
 void release(void);
 
 int npvs = 0;
 char **pvs = NULL;
 int **vals = NULL;
 
-enum e_wins { WMENU, WMAIN, WSTAT } active_win;
+WINDOW *active_win;
 
 int
 process_input_file(FILE *file)
@@ -70,7 +68,7 @@ wmenu_search(WINDOW *win_menu, MENU *menu)
 		wclrtoeol(win_menu);
 		mvwaddstr(win_menu, 1, 2, menu_pattern(menu));
 
-		(active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+		border_if_active(win_menu);
 		wrefresh(win_menu);
 	}
 
@@ -78,14 +76,17 @@ wmenu_search(WINDOW *win_menu, MENU *menu)
 	wmove(win_menu, 1, 1);
 	wclrtoeol(win_menu);
 
-	(active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+	border_if_active(win_menu);
 	wrefresh(win_menu);
 }
 
 void
-clear_border(WINDOW *w)
+border_if_active(WINDOW *w)
 {
-	wborder(w, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+	if (w == active_win)
+		box(w, 0, 0);
+	else
+		wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
 }
 
 void
@@ -145,10 +146,10 @@ main(int argc, char *argv[])
 	set_menu_mark(menu, "-");
 	post_menu(menu);
 
-	active_win = FIRST_ACTIVE_WIN;
+	active_win = win_menu;
 
 	while ((c = getch()) != 'q') {
-		if (active_win == WMENU) {
+		if (active_win == win_menu) {
 			switch (c) {
 			/* menu movement */
 			case KEY_DOWN: case 'j':
@@ -180,12 +181,12 @@ main(int argc, char *argv[])
 		switch (c) {
 		/* select active win */
 		case '\t':
-			active_win = (active_win == WMENU) ? WMAIN : WMENU;
+			active_win = (active_win == win_menu) ? win_main : win_menu;
 			break;
 		}
 
 		/* menu window */
-		(active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+		border_if_active(win_menu);
 		wrefresh(win_menu);
 
 		/* main window */
@@ -193,7 +194,7 @@ main(int argc, char *argv[])
 		mvwaddstr(win_main, 1, 1, item_name(current_item(menu)));
 		mvwprintw(win_main, 2, 1, "%d.", item_index(current_item(menu)));
 		mvwprintw(win_main, 3, 1, "VAL = %d", vals[item_index(current_item(menu))]);
-		(active_win == WMAIN) ? box(win_main, 0, 0) : clear_border(win_main);
+		border_if_active(win_main);
 		wrefresh(win_main);
 
 		/* status window */
