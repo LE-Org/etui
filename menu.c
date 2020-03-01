@@ -13,85 +13,10 @@ int **vals = NULL;
 
 enum e_wins { WMENU, WMAIN, WSTAT } active_win;
 
-int process_input_file(FILE *file)
-{
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t nread;
-    char *buf;
-    int i;
-
-    while ((nread = getline(&line, &len, file)) != -1) {
-        for (i = 0; i < nread; ++i)
-            if (line[i] == '\n' || line[i] == ' ')
-                break;
-
-        buf = malloc(i+1);
-        strncpy(buf, line, i);
-        buf[i] = '\0';
-
-        pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
-        vals = realloc(vals, (npvs + 1) * sizeof(int *));
-
-        pvs[npvs] = buf;
-        vals[npvs] = malloc(sizeof(int));
-
-        if (buf == NULL || pvs == NULL || vals == NULL || vals[npvs] == NULL)
-            goto alloc_err;
-
-        ++npvs;
-    }
-    free(line);
-
-    return 0;
-alloc_err:
-    return 1;
-}
-
-void release()
-{
-    int i;
-    for (i = 0; i < npvs; ++i) {
-        free(pvs[i]);
-        free(vals[i]);
-    }
-    free(pvs);
-    free(vals);
-}
-
-void clear_border(WINDOW *w)
-{
-    wborder(w, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-}
-
-void wmenu_search(WINDOW *win_menu, MENU *menu)
-{
-    int c;
-    while ((c = getch()) != '\n') {
-        mvwaddch(win_menu, 1, 1, '/');
-        if (c == KEY_BACKSPACE) {
-            menu_driver(menu, REQ_BACK_PATTERN);
-        } else {
-            menu_driver(menu, c); /* TODO: check c */
-        }
-
-        /* update search field, but leave '/' character alone */
-        wmove(win_menu, 1, 2);
-        wclrtoeol(win_menu);
-        mvwaddstr(win_menu, 1, 2, menu_pattern(menu));
-
-        (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
-        wrefresh(win_menu);
-    }
-
-    /* hide search field */
-    wmove(win_menu, 1, 1);
-    wclrtoeol(win_menu);
-
-    (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
-    wrefresh(win_menu);
-}
-
+int process_input_file(FILE *);
+void clear_border(WINDOW *w);
+void release();
+void wmenu_search(WINDOW *, MENU *);
 
 int main(int argc, char *argv[])
 {
@@ -204,4 +129,83 @@ int main(int argc, char *argv[])
 
     endwin();
     release();
+}
+
+int process_input_file(FILE *file)
+{
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t nread;
+    char *buf;
+    int i;
+
+    while ((nread = getline(&line, &len, file)) != -1) {
+        for (i = 0; i < nread; ++i)
+            if (line[i] == '\n' || line[i] == ' ')
+                break;
+
+        buf = malloc(i+1);
+        strncpy(buf, line, i);
+        buf[i] = '\0';
+
+        pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
+        vals = realloc(vals, (npvs + 1) * sizeof(int *));
+
+        pvs[npvs] = buf;
+        vals[npvs] = malloc(sizeof(int));
+
+        if (buf == NULL || pvs == NULL || vals == NULL || vals[npvs] == NULL)
+            goto alloc_err;
+
+        ++npvs;
+    }
+    free(line);
+
+    return 0;
+alloc_err:
+    return 1;
+}
+
+void clear_border(WINDOW *w)
+{
+    wborder(w, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+}
+
+void release()
+{
+    int i;
+    for (i = 0; i < npvs; ++i) {
+        free(pvs[i]);
+        free(vals[i]);
+    }
+    free(pvs);
+    free(vals);
+}
+
+void wmenu_search(WINDOW *win_menu, MENU *menu)
+{
+    int c;
+    while ((c = getch()) != '\n') {
+        mvwaddch(win_menu, 1, 1, '/');
+        if (c == KEY_BACKSPACE) {
+            menu_driver(menu, REQ_BACK_PATTERN);
+        } else {
+            menu_driver(menu, c); /* TODO: check c */
+        }
+
+        /* update search field, but leave '/' character alone */
+        wmove(win_menu, 1, 2);
+        wclrtoeol(win_menu);
+        mvwaddstr(win_menu, 1, 2, menu_pattern(menu));
+
+        (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+        wrefresh(win_menu);
+    }
+
+    /* hide search field */
+    wmove(win_menu, 1, 1);
+    wclrtoeol(win_menu);
+
+    (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
+    wrefresh(win_menu);
 }
