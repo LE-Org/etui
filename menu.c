@@ -173,14 +173,9 @@ int main(int argc, char *argv[])
         (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
         wrefresh(win_menu);
 
-        wmove(win_main, 1, 1);
-        wclrtoeol(win_main);
+        wclear(win_main);
         mvwaddstr(win_main, 1, 1, item_name(current_item(my_menu)));
-        wmove(win_main, 2, 1);
-        wclrtoeol(win_main);
         mvwprintw(win_main, 2, 1, "%d.", item_index(current_item(my_menu)));
-        wmove(win_main, 3, 1);
-        wclrtoeol(win_main);
         mvwprintw(win_main, 3, 1, "VAL = %d", vals[item_index(current_item(my_menu))]);
         (active_win == WMAIN) ? box(win_main, 0, 0) : clear_border(win_main);
         wrefresh(win_main);
