@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
     }
     fclose(file);
 
+    /* init ncurses */
     initscr();
     timeout(10);
     noecho();
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
     while ((c = getch()) != 'q') {
         if (active_win == WMENU) {
             switch(c) {
+            /* menu movement */
             case KEY_DOWN: case 'j':
                 menu_driver(menu, REQ_DOWN_ITEM);
                 break;
@@ -189,6 +191,7 @@ int main(int argc, char *argv[])
         wrefresh(win_stat);
     }
 
+    /* clean up */
     for (i = 0; i < npvs; ++i)
         free_item(mitems[i]);
     free(mitems);
