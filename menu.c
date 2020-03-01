@@ -31,6 +31,7 @@ process_input_file(FILE *file)
 	size_t len = 0;
 	ssize_t nread;
 	char *buf;
+	int *val;
 	int i;
 
 	while ((nread = getline(&line, &len, file)) != -1) {
@@ -42,17 +43,19 @@ process_input_file(FILE *file)
 		strncpy(buf, line, i);
 		buf[i] = '\0';
 
+		val = malloc(sizeof(int));
+
+		if (buf == NULL || val == NULL)
+			goto alloc_err;
+
 		pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
 		vals = realloc(vals, (npvs + 1) * sizeof(int *));
 
-		if (buf == NULL || pvs == NULL || vals == NULL)
+		if (pvs == NULL || vals == NULL)
 			goto alloc_err;
 
 		pvs[npvs] = buf;
-		vals[npvs] = malloc(sizeof(int));
-
-		if (vals[npvs] == NULL)
-			goto alloc_err;
+		vals[npvs] = val;
 
 		++npvs;
 	}
