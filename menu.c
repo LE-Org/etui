@@ -67,21 +67,21 @@ void clear_border(WINDOW *w)
     wborder(w, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
 }
 
-void wmenu_search(WINDOW *win_menu, MENU *my_menu)
+void wmenu_search(WINDOW *win_menu, MENU *menu)
 {
     int c;
     while ((c = getch()) != '\n') {
         mvwaddch(win_menu, 1, 1, '/');
         if (c == KEY_BACKSPACE) {
-            menu_driver(my_menu, REQ_BACK_PATTERN);
+            menu_driver(menu, REQ_BACK_PATTERN);
         } else {
-            menu_driver(my_menu, c); /* TODO: check c */
+            menu_driver(menu, c); /* TODO: check c */
         }
 
         wmove(win_menu, 1, 2);
         wclrtoeol(win_menu);
         (active_win == WMENU) ? box(win_menu, 0, 0) : clear_border(win_menu);
-        mvwaddstr(win_menu, 1, 2, menu_pattern(my_menu));
+        mvwaddstr(win_menu, 1, 2, menu_pattern(menu));
         wrefresh(win_menu);
     }
     wmove(win_menu, 1, 1);
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     WINDOW *win_menu, *win_main, *win_stat;
     ITEM **my_items;
     int c;
-    MENU *my_menu;
+    MENU *menu;
     int i;
     FILE *file;
 
@@ -127,11 +127,11 @@ int main(int argc, char *argv[])
     my_items[npvs] = (ITEM *)NULL;
 
     /* create menu */
-    my_menu = new_menu((ITEM **)my_items);
-    set_menu_win(my_menu, win_menu);
-    set_menu_sub(my_menu, derwin(win_menu,10,20,5,5));
-    set_menu_mark(my_menu, "-");
-    post_menu(my_menu);
+    menu = new_menu((ITEM **)my_items);
+    set_menu_win(menu, win_menu);
+    set_menu_sub(menu, derwin(win_menu,10,20,5,5));
+    set_menu_mark(menu, "-");
+    post_menu(menu);
 
     active_win = FIRST_ACTIVE_WIN;
 
@@ -139,27 +139,27 @@ int main(int argc, char *argv[])
         if (active_win == WMENU) {
             switch(c) {
             case KEY_DOWN: case 'j':
-                menu_driver(my_menu, REQ_DOWN_ITEM);
+                menu_driver(menu, REQ_DOWN_ITEM);
                 break;
             case KEY_UP: case 'k':
-                menu_driver(my_menu, REQ_UP_ITEM);
+                menu_driver(menu, REQ_UP_ITEM);
                 break;
             case 'g':
-                menu_driver(my_menu, REQ_FIRST_ITEM);
+                menu_driver(menu, REQ_FIRST_ITEM);
                 break;
             case 'G':
-                menu_driver(my_menu, REQ_LAST_ITEM);
+                menu_driver(menu, REQ_LAST_ITEM);
                 break;
 
             /* search in menu */
             case 'n':
-                menu_driver(my_menu, REQ_NEXT_MATCH);
+                menu_driver(menu, REQ_NEXT_MATCH);
                 break;
             case 'p':
-                menu_driver(my_menu, REQ_PREV_MATCH);
+                menu_driver(menu, REQ_PREV_MATCH);
                 break;
             case '/': /* append to pattern match buffer */
-                wmenu_search(win_menu, my_menu);
+                wmenu_search(win_menu, menu);
                 break;
             }
         }
@@ -177,9 +177,9 @@ int main(int argc, char *argv[])
 
         /* main window */
         wclear(win_main);
-        mvwaddstr(win_main, 1, 1, item_name(current_item(my_menu)));
-        mvwprintw(win_main, 2, 1, "%d.", item_index(current_item(my_menu)));
-        mvwprintw(win_main, 3, 1, "VAL = %d", vals[item_index(current_item(my_menu))]);
+        mvwaddstr(win_main, 1, 1, item_name(current_item(menu)));
+        mvwprintw(win_main, 2, 1, "%d.", item_index(current_item(menu)));
+        mvwprintw(win_main, 3, 1, "VAL = %d", vals[item_index(current_item(menu))]);
         (active_win == WMAIN) ? box(win_main, 0, 0) : clear_border(win_main);
         wrefresh(win_main);
 
@@ -193,8 +193,8 @@ int main(int argc, char *argv[])
         free_item(my_items[i]);
     free(my_items);
 
-    unpost_menu(my_menu);
-    free_menu(my_menu);
+    unpost_menu(menu);
+    free_menu(menu);
 
     endwin();
     release();
