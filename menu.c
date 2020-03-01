@@ -7,6 +7,7 @@
 
 int npvs = 0;
 char **pvs = NULL;
+int **vals = NULL;
 
 int process_input_file(FILE *file)
 {
@@ -26,7 +27,10 @@ int process_input_file(FILE *file)
         buf[i] = '\0';
 
         pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
-        pvs[npvs++] = buf;
+        pvs[npvs] = buf;
+        vals = realloc(vals, (npvs + 1) * sizeof(int *));
+        vals[npvs] = malloc(sizeof(int));
+        ++npvs;
     }
     free(line);
 }
@@ -34,9 +38,12 @@ int process_input_file(FILE *file)
 void release()
 {
     int i;
-    for (i = 0; i < npvs; ++i)
+    for (i = 0; i < npvs; ++i) {
         free(pvs[i]);
+        free(vals[i]);
+    }
     free(pvs);
+    free(vals);
 }
 
 int main(int argc, char *argv[])
