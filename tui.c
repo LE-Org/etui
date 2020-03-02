@@ -10,7 +10,7 @@
 #define WFLDS_W 20
 #define WMAIN_H (LINES - WSTAT_H)
 #define WMAIN_W (COLS - WMENU_W - WFLDS_W)
-#define WSTAT_H 3
+#define WSTAT_H 1
 #define WSTAT_W COLS
 
 #define MENU_H (WMENU_H - 2)
@@ -229,8 +229,7 @@ main(int argc, char *argv[])
 		wrefresh(win_main);
 
 		/* status window */
-		mvwprintw(win_stat,1,2,"Press %c to Exit", 'q');
-		box(win_stat, 0, 0);
+		mvwprintw(win_stat,0,1,"%d pvs", npvs);
 		wrefresh(win_stat);
 	}
 
