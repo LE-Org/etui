@@ -225,16 +225,17 @@ main(int argc, char *argv[])
 		wrefresh(win_menu);
 
 		/* fields window */
-		wclear(win_flds);
 		for (i = 0; i < MENU_H && i + top_row(menu) < npvs; ++i)
-			mvwprintw(win_flds, i+1, 1, "%d", vals[i+top_row(menu)]);
+			mvwprintw(win_flds, i+1, 1, "%-20d", vals[i+top_row(menu)]);
 		wrefresh(win_flds);
 
 		/* main window */
-		wclear(win_main);
+		wmove(win_main, 1, 1); wclrtoeol(win_main);
 		mvwaddstr(win_main, 1, 1, item_name(current_item(menu)));
+		wmove(win_main, 2, 1); wclrtoeol(win_main);
 		mvwprintw(win_main, 2, 1, "%d.",
 		          item_index(current_item(menu)));
+		wmove(win_main, 3, 1); wclrtoeol(win_main);
 		mvwprintw(win_main, 3, 1, "VAL = %d",
 		          vals[item_index(current_item(menu))]);
 		border_if_active(win_main);
