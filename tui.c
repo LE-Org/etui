@@ -148,11 +148,23 @@ main(int argc, char *argv[])
 	keypad(stdscr, TRUE);
 	curs_set(0);
 
+	if (has_colors() == FALSE)
+	{
+		endwin();
+		fprintf(stderr, "Terminals doesn't have color support.\n");
+		return -3;
+	}
+	start_color();
+	init_pair(1, COLOR_BLACK, COLOR_WHITE); /* inverted */
+
 	/* define window dimensions */
 	win_menu = newwin(WMENU_H, WMENU_W, 0, 0);
 	win_flds = newwin(WFLDS_H, WFLDS_H, 0, WMENU_W);
 	win_main = newwin(WMAIN_H, WMAIN_W, 0, WMENU_W + WFLDS_W);
 	win_stat = newwin(WSTAT_H, WSTAT_W, WMENU_H, 0);
+
+	/* color windows */
+	wbkgd(win_stat, COLOR_PAIR(1));
 
 	/* create items */
 	mitems = (ITEM **)calloc(npvs + 1, sizeof(ITEM *));
