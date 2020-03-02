@@ -6,10 +6,15 @@
 
 #define WMENU_H (LINES - WSTAT_H)
 #define WMENU_W 40
+#define WFLDS_H WMENU_H
+#define WFLDS_W 20
 #define WMAIN_H (LINES - WSTAT_H)
-#define WMAIN_W (COLS - WMENU_W)
+#define WMAIN_W (COLS - WMENU_W - WFLDS_W)
 #define WSTAT_H 3
 #define WSTAT_W COLS
+
+#define MENU_H (WMENU_H - 2)
+#define MENU_W (WMENU_W - 2)
 
 #define NC_TIMEOUT 50
 
@@ -120,7 +125,7 @@ int
 main(int argc, char *argv[])
 {
 	FILE *file;
-	WINDOW *win_menu, *win_main, *win_stat;
+	WINDOW *win_menu, *win_flds, *win_main, *win_stat;
 	int c;
 	MENU *menu;
 	ITEM **mitems;
@@ -145,7 +150,8 @@ main(int argc, char *argv[])
 
 	/* define window dimensions */
 	win_menu = newwin(WMENU_H, WMENU_W, 0, 0);
-	win_main = newwin(WMAIN_H, WMAIN_W, 0, WMENU_W);
+	win_flds = newwin(WFLDS_H, WFLDS_H, 0, WMENU_W);
+	win_main = newwin(WMAIN_H, WMAIN_W, 0, WMENU_W + WFLDS_W);
 	win_stat = newwin(WSTAT_H, WSTAT_W, WMENU_H, 0);
 
 	/* create items */
@@ -157,8 +163,8 @@ main(int argc, char *argv[])
 	/* create menu */
 	menu = new_menu((ITEM **)mitems);
 	set_menu_win(menu, win_menu);
-	set_menu_sub(menu, derwin(win_menu,WMENU_H-2,WMENU_W-2,1,1));
-	set_menu_format(menu, WMENU_H-2, 1);
+	set_menu_sub(menu, derwin(win_menu,MENU_H,MENU_W,1,1));
+	set_menu_format(menu, MENU_H, 1);
 	set_menu_mark(menu, "-");
 	post_menu(menu);
 
@@ -205,6 +211,12 @@ main(int argc, char *argv[])
 		/* menu window */
 		border_if_active(win_menu);
 		wrefresh(win_menu);
+
+		/* fields window */
+		wclear(win_flds);
+		for (i = 0; i < MENU_H && i + top_row(menu) < npvs; ++i)
+			mvwprintw(win_flds, i+1, 1, "%d", vals[i+top_row(menu)]);
+		wrefresh(win_flds);
 
 		/* main window */
 		wclear(win_main);
