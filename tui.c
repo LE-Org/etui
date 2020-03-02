@@ -157,7 +157,8 @@ main(int argc, char *argv[])
 	/* create menu */
 	menu = new_menu((ITEM **)mitems);
 	set_menu_win(menu, win_menu);
-	set_menu_sub(menu, derwin(win_menu,10,20,5,5));
+	set_menu_sub(menu, derwin(win_menu,WMENU_H-2,WMENU_W-2,1,1));
+	set_menu_format(menu, WMENU_H-2, 1);
 	set_menu_mark(menu, "-");
 	post_menu(menu);
 
