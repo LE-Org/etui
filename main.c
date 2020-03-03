@@ -91,6 +91,7 @@ int
 main(int argc, char **argv)
 {
 	int i;
+	int c;
 	swallow_stderr();
 	if (argc != 2 || process_input_file(argv[1])) {
 		return -1;
@@ -105,7 +106,10 @@ main(int argc, char **argv)
 
 	for(;;) {
 		process_ca_events();
-		process_tui_events();
+		c = process_tui_events();
+		// quit condition
+		if (c == 'q')
+			break;
 	}
 
 	for (i=0; i < npvs; i++) {

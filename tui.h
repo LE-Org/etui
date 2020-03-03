@@ -15,7 +15,7 @@ start_tui();
 int
 stop_tui();
 
-void
+int
 process_tui_events();
 
 int

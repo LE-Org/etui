@@ -190,7 +190,7 @@ update_tui_entry(int entry_id, const char *value)
 	return 0;
 }
 
-void
+int
 process_tui_events()
 {
 	int c;
@@ -262,6 +262,6 @@ process_tui_events()
 		border_if_active(win_main);
 		wrefresh(win_main);
 	}
-
+	return c;
 }
 
