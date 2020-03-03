@@ -25,7 +25,7 @@
 
 static void wmenu_search(WINDOW *, MENU *);
 static void recreate_menu(void);
-static void create_items_from_pvs(void);
+static void recreate_items_from_pvs(void);
 static void border_if_active(WINDOW *);
 static void release(void);
 int start_tui(void);
@@ -86,7 +86,7 @@ recreate_menu(void)
 }
 
 static void
-create_items_from_pvs(void)
+recreate_items_from_pvs(void)
 {
 	/* state of items is altered when used, that's why this */
 	/* needs to be called everytime we want to update the menu */
@@ -181,7 +181,7 @@ create_tui_entry(const char *name)
 	gpvs[entry_id]->value[0] = '\0';
 
 	/* create items */
-	create_items_from_pvs();
+	recreate_items_from_pvs();
 	recreate_menu();
 	wrefresh(win_menu);
 	return entry_id;
