@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "tui.h"
 #include "cahelper.h"
 #include "utils.h"
+
 #define FPS (20)
 #define LOOP_PERIOD (1000000000 / FPS)
 

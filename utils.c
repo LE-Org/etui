@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <time.h>
-#define NSEC_PER_SEC (1000000000)
 
+#define NSEC_PER_SEC (1000000000)
 
 void
 swallow_stderr()
