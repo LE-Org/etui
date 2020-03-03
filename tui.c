@@ -128,7 +128,7 @@ start_tui(void)
 	noecho();
 	keypad(stdscr, TRUE);
 	curs_set(0);
-	if (has_colors() == FALSE)
+	if (has_colors() == FALSE) /* TODO: change handling of this */
 	{
 		endwin();
 		fprintf(stderr, "Terminals doesn't have color support.\n");
@@ -225,6 +225,19 @@ process_tui_events(void)
 			menu_driver(menu, REQ_PREV_MATCH);
 			break;
 		case '/': /* append to pattern match buffer */
+			/* TODO: this call causes more getch(),
+			 * it would be good if we would have
+			 * only the one explicit getch() at the
+			 * top.
+			 * Solution:
+			 * 1. case '/': raises a search flag
+			 * 2. implement a new window win_cmds for searches
+			      (it will also be used for :commands)
+			 * 3. case '/': sets active_win = win_cmds
+			 * 4.           break;
+			 * 5. add an if (active_win == win_cmds)
+			 *    block in this function
+			 */
 			wmenu_search(win_menu, menu);
 			break;
 		}
