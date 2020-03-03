@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "cahelper.h"
 
-// Example of using CA helper functions
+/* Example of using CA helper functions */
 
 void
 callback(struct sub_info *sub)

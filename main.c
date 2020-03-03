@@ -44,7 +44,7 @@ finish_pv_entry(struct pv_entry *pve)
 	unsubscribe_pv(&pve->sub);
 }
 
-// TODO: get this to a separate file
+/* TODO: get this to a separate file */
 static int
 process_input_file(const char *path)
 {
@@ -70,7 +70,7 @@ process_input_file(const char *path)
 		if (buf == NULL)
 			goto alloc_err;
 
-		// is that optimized in glibc?
+		/* is that optimized in glibc? */
 		pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
 
 		if (pvs == NULL)
@@ -109,7 +109,7 @@ main(int argc, char **argv)
 	for(;;) {
 		process_ca_events();
 		c = process_tui_events();
-		// quit condition
+		/* quit condition */
 		if (c == 'q')
 			break;
 		wait_tick(LOOP_PERIOD);

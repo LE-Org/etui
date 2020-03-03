@@ -57,7 +57,7 @@ int
 unsubscribe_pv(struct sub_info *sub)
 {
 	int ca_rc;
-	// clearing channel also reclaims subscriptions
+	/* clearing channel also reclaims subscriptions */
 	ca_rc = ca_clear_channel(sub->chid);
 	assert(ca_rc == ECA_NORMAL);
 	return ca_rc;

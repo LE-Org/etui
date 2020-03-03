@@ -82,8 +82,8 @@ recreate_menu()
 static void
 create_items_from_pvs()
 {
-	// state of items is altered when used, that's why this
-	// needs to be called everytime we want to update the menu
+	/* state of items is altered when used, that's why this */
+	/* needs to be called everytime we want to update the menu */
 	int i;
 	for (i=0; i < npvs; i++) {
 		if (mitems[i]) {
