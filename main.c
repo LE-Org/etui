@@ -38,8 +38,7 @@ pv_entry_callback(struct sub_info *sub)
 static void
 init_pv_entry(struct pv_entry *pve, const char *name)
 {
-	int entry_id = create_tui_entry(name);
-	pve->entry_id = entry_id;
+	pve->entry_id = create_tui_entry(name);
 	init_sub_info(&pve->sub, name, pv_entry_callback, pve);
 	subscribe_pv(&pve->sub);
 }
