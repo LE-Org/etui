@@ -35,11 +35,11 @@ int update_tui_entry(int, const char *);
 int process_tui_events(void);
 
 static int npvs = 0;
-struct graphical_pv *gpvs[MAX_N_ENTRIES + 1];
-WINDOW *win_menu, *win_flds, *win_main, *win_stat;
-MENU *menu;
-ITEM *mitems[MAX_N_ENTRIES + 1];
-WINDOW *active_win;
+static struct graphical_pv *gpvs[MAX_N_ENTRIES + 1];
+static WINDOW *win_menu, *win_flds, *win_main, *win_stat;
+static MENU *menu;
+static ITEM *mitems[MAX_N_ENTRIES + 1];
+static WINDOW *active_win;
 
 static void
 wmenu_search(WINDOW *win_menu, MENU *menu)
