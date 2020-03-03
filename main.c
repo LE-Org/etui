@@ -4,6 +4,8 @@
 #include "tui.h"
 #include "cahelper.h"
 #include "utils.h"
+#define FPS (20)
+#define LOOP_PERIOD (1000000000 / FPS)
 
 static int npvs = 0;
 static char **pvs = NULL;
@@ -110,6 +112,7 @@ main(int argc, char **argv)
 		// quit condition
 		if (c == 'q')
 			break;
+		wait_tick(LOOP_PERIOD);
 	}
 
 	for (i=0; i < npvs; i++) {

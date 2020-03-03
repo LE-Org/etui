@@ -4,4 +4,7 @@
 void
 swallow_stderr();
 
+void
+wait_tick(unsigned long long period_ns);
+
 #endif
