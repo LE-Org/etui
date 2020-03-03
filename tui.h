@@ -9,9 +9,9 @@ struct graphical_pv {
   char value[MAX_GPV_VALUE_SIZE];
 };
 
-int start_tui();
-int stop_tui();
-int process_tui_events();
+int start_tui(void);
+int stop_tui(void);
+int process_tui_events(void);
 int create_tui_entry(const char *name);
 int update_tui_entry(int entry_id, const char *value);
 

@@ -23,12 +23,18 @@
 
 #define MAX_N_ENTRIES 1500
 
-static int npvs = 0;
-
 static void wmenu_search(WINDOW *, MENU *);
+static void recreate_menu(void);
+static void create_items_from_pvs(void);
 static void border_if_active(WINDOW *);
 static void release(void);
+int start_tui(void);
+int stop_tui(void);
+int create_tui_entry(const char *);
+int update_tui_entry(int, const char *);
+int process_tui_events(void);
 
+static int npvs = 0;
 struct graphical_pv *gpvs[MAX_N_ENTRIES + 1];
 WINDOW *win_menu, *win_flds, *win_main, *win_stat;
 MENU *menu;
@@ -65,7 +71,7 @@ wmenu_search(WINDOW *win_menu, MENU *menu)
 }
 
 static void
-recreate_menu()
+recreate_menu(void)
 {
 	if (menu) {
 		unpost_menu(menu);
@@ -80,7 +86,7 @@ recreate_menu()
 }
 
 static void
-create_items_from_pvs()
+create_items_from_pvs(void)
 {
 	/* state of items is altered when used, that's why this */
 	/* needs to be called everytime we want to update the menu */
@@ -112,7 +118,7 @@ release(void)
 }
 
 int
-start_tui()
+start_tui(void)
 {
 	npvs = 0;
 	/* init ncurses */
@@ -147,7 +153,7 @@ start_tui()
 }
 
 int
-stop_tui()
+stop_tui(void)
 {
 	int i;
 	/* clean up */
@@ -191,7 +197,7 @@ update_tui_entry(int entry_id, const char *value)
 }
 
 int
-process_tui_events()
+process_tui_events(void)
 {
 	int c;
 	int i;

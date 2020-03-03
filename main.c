@@ -9,14 +9,18 @@
 #define FPS (20)
 #define LOOP_PERIOD (1000000000 / FPS)
 
-static int npvs = 0;
-static char **pvs = NULL;
-
 struct pv_entry {
 	int entry_id;
 	struct sub_info sub;
 };
 
+void pv_entry_callback(struct sub_info *);
+static void init_pv_entry(struct pv_entry *, const char *);
+static void finish_pv_entry(struct pv_entry *);
+static int process_input_file(const char *);
+
+static int npvs = 0;
+static char **pvs = NULL;
 static struct pv_entry *pves = NULL;
 
 void

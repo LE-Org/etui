@@ -4,7 +4,7 @@
 #define NSEC_PER_SEC (1000000000)
 
 void
-swallow_stderr()
+swallow_stderr(void)
 {
 	freopen("/dev/null", "w", stderr);
 }

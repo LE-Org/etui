@@ -25,9 +25,9 @@ struct sub_info {
 	void *usr;
 };
 
-int start_ca();
-void stop_ca();
-void process_ca_events();
+int start_ca(void);
+void stop_ca(void);
+void process_ca_events(void);
 void init_sub_info(struct sub_info *sub, const char *name,
                    sub_callback func, void *usr);
 int subscribe_pv(struct sub_info *sub);
