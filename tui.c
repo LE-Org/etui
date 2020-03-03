@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <menu.h>
+
+#include "tui.h"
 
 #define WMENU_H (LINES - WSTAT_H)
 #define WMENU_W 40
@@ -18,58 +21,19 @@
 
 #define NC_TIMEOUT 50
 
-static int process_input_file(FILE *);
+#define MAX_N_ENTRIES 1500
+
+static int npvs = 0;
+
 static void wmenu_search(WINDOW *, MENU *);
 static void border_if_active(WINDOW *);
 static void release(void);
 
-int npvs = 0;
-char **pvs = NULL;
-int **vals = NULL;
-
+struct graphical_pv *gpvs[MAX_N_ENTRIES + 1];
+WINDOW *win_menu, *win_flds, *win_main, *win_stat;
+MENU *menu;
+ITEM *mitems[MAX_N_ENTRIES + 1];
 WINDOW *active_win;
-
-static int
-process_input_file(FILE *file)
-{
-	char *line = NULL;
-	size_t len = 0;
-	ssize_t nread;
-	char *buf;
-	int *val;
-	int i;
-
-	while ((nread = getline(&line, &len, file)) != -1) {
-		for (i = 0; i < nread; ++i)
-			if (line[i] == '\n' || line[i] == ' ')
-				break;
-
-		buf = malloc(i+1);
-		strncpy(buf, line, i);
-		buf[i] = '\0';
-
-		val = malloc(sizeof(int));
-
-		if (buf == NULL || val == NULL)
-			goto alloc_err;
-
-		pvs = realloc(pvs, (npvs + 1) * sizeof(char *));
-		vals = realloc(vals, (npvs + 1) * sizeof(int *));
-
-		if (pvs == NULL || vals == NULL)
-			goto alloc_err;
-
-		pvs[npvs] = buf;
-		vals[npvs] = val;
-
-		++npvs;
-	}
-	free(line);
-
-	return 0;
-alloc_err:
-	return 1;
-}
 
 static void
 wmenu_search(WINDOW *win_menu, MENU *menu)
@@ -101,6 +65,36 @@ wmenu_search(WINDOW *win_menu, MENU *menu)
 }
 
 static void
+recreate_menu()
+{
+	if (menu) {
+		unpost_menu(menu);
+		free_menu(menu);
+	}
+	menu = new_menu((ITEM **)mitems);
+	set_menu_win(menu, win_menu);
+	set_menu_sub(menu, derwin(win_menu,MENU_H,MENU_W,1,1));
+	set_menu_format(menu, MENU_H, 3);
+	set_menu_mark(menu, "-");
+	post_menu(menu);
+}
+
+static void
+create_items_from_pvs()
+{
+	/* state of items is altered when used, that's why this */
+	/* needs to be called everytime we want to update the menu */
+	int i;
+	for (i=0; i < npvs; i++) {
+		if (mitems[i]) {
+			free_item(mitems[i]);
+		}
+		mitems[i] = new_item(gpvs[i]->name, "");
+	}
+}
+
+
+static void
 border_if_active(WINDOW *w)
 {
 	if (w == active_win)
@@ -112,42 +106,21 @@ border_if_active(WINDOW *w)
 static void
 release(void)
 {
-	int i;
-	for (i = 0; i < npvs; ++i) {
-		free(pvs[i]);
-		free(vals[i]);
-	}
-	free(pvs);
-	free(vals);
+    int i;
+    for (i=0; i < npvs; i++)
+	free(gpvs[i]);
 }
 
 int
-main(int argc, char *argv[])
+start_tui()
 {
-	FILE *file;
-	WINDOW *win_menu, *win_flds, *win_main, *win_stat;
-	int c;
-	MENU *menu;
-	ITEM **mitems;
-	int i;
-
-	if (argc != 2 || (file = fopen(argv[1], "r")) == NULL) {
-		return -1;
-	}
-	if (process_input_file(file)) {
-		fclose(file);
-		fprintf(stderr, "Can't process file");
-		return -2;
-	}
-	fclose(file);
-
+	npvs = 0;
 	/* init ncurses */
 	initscr();
 	timeout(NC_TIMEOUT);
 	noecho();
 	keypad(stdscr, TRUE);
 	curs_set(0);
-
 	if (has_colors() == FALSE)
 	{
 		endwin();
@@ -165,95 +138,130 @@ main(int argc, char *argv[])
 
 	/* color windows */
 	wbkgd(win_stat, COLOR_PAIR(1));
-
-	/* create items */
-	mitems = (ITEM **)calloc(npvs + 1, sizeof(ITEM *));
-	for (i = 0; i < npvs; ++i)
-		mitems[i] = new_item(pvs[i], "");
-	mitems[npvs] = (ITEM *)NULL;
-
-	/* create menu */
-	menu = new_menu((ITEM **)mitems);
-	set_menu_win(menu, win_menu);
-	set_menu_sub(menu, derwin(win_menu,MENU_H,MENU_W,1,1));
-	set_menu_format(menu, MENU_H, 1);
-	set_menu_mark(menu, "-");
-	post_menu(menu);
-
 	active_win = win_menu;
 
-	while ((c = getch()) != 'q') {
-		if (active_win == win_menu) {
-			switch (c) {
-			/* menu movement */
-			case KEY_DOWN: case 'j':
-				menu_driver(menu, REQ_DOWN_ITEM);
-				break;
-			case KEY_UP: case 'k':
-				menu_driver(menu, REQ_UP_ITEM);
-				break;
-			case 'g':
-				menu_driver(menu, REQ_FIRST_ITEM);
-				break;
-			case 'G':
-				menu_driver(menu, REQ_LAST_ITEM);
-				break;
+	/* create menu */
+	mitems[0] = NULL;
+	recreate_menu();
+	return 0;
+}
 
-			/* search in menu */
-			case 'n':
-				menu_driver(menu, REQ_NEXT_MATCH);
-				break;
-			case 'p':
-				menu_driver(menu, REQ_PREV_MATCH);
-				break;
-			case '/': /* append to pattern match buffer */
-				wmenu_search(win_menu, menu);
-				break;
-			}
-		}
-
-		switch (c) {
-		/* select active win */
-		case '\t':
-			active_win = (active_win == win_menu) ?
-			             win_main : win_menu;
-			break;
-		}
-
-		/* menu window */
-		border_if_active(win_menu);
-		wrefresh(win_menu);
-
-		/* fields window */
-		for (i = 0; i < MENU_H && i + top_row(menu) < npvs; ++i)
-			mvwprintw(win_flds, i+1, 1, "%-20d", vals[i+top_row(menu)]);
-		wrefresh(win_flds);
-
-		/* main window */
-		wmove(win_main, 1, 1); wclrtoeol(win_main);
-		mvwaddstr(win_main, 1, 1, item_name(current_item(menu)));
-		wmove(win_main, 2, 1); wclrtoeol(win_main);
-		mvwprintw(win_main, 2, 1, "%d.",
-		          item_index(current_item(menu)));
-		wmove(win_main, 3, 1); wclrtoeol(win_main);
-		mvwprintw(win_main, 3, 1, "VAL = %d",
-		          vals[item_index(current_item(menu))]);
-		border_if_active(win_main);
-		wrefresh(win_main);
-
-		/* status window */
-		mvwprintw(win_stat,0,1,"%d pvs", npvs);
-		wrefresh(win_stat);
-	}
-
+int
+stop_tui()
+{
+	int i;
 	/* clean up */
 	for (i = 0; i < npvs; ++i)
 		free_item(mitems[i]);
-	free(mitems);
 
 	unpost_menu(menu);
 	free_menu(menu);
 
 	endwin();
 	release();
+	return 0;
 }
+
+int
+create_tui_entry(const char *name)
+{
+	int entry_id = npvs;
+	npvs++;
+	assert(entry_id < MAX_N_ENTRIES);
+	
+	gpvs[entry_id] = calloc(1, sizeof(struct graphical_pv));
+	strncpy(gpvs[entry_id]->name, name, MAX_GPV_NAME_SIZE);
+	gpvs[entry_id]->value[0] = '\0';
+
+	/* create items */
+	create_items_from_pvs();
+	unpost_menu(menu);
+	set_menu_items(menu, mitems);
+	post_menu(menu);
+	wrefresh(win_menu);
+	return entry_id;
+}
+
+int
+update_tui_entry(int entry_id, const char *value)
+{
+	assert(entry_id < npvs && entry_id >= 0);
+	strncpy(gpvs[entry_id]->value, value, MAX_GPV_VALUE_SIZE);
+	return 0;
+}
+
+int
+process_tui_events()
+{
+	int c;
+	int i;
+	c = getch();
+	if (active_win == win_menu) {
+		switch (c) {
+		/* menu movement */
+		case KEY_DOWN: case 'j':
+			menu_driver(menu, REQ_DOWN_ITEM);
+			break;
+		case KEY_UP: case 'k':
+			menu_driver(menu, REQ_UP_ITEM);
+			break;
+		case 'g':
+			menu_driver(menu, REQ_FIRST_ITEM);
+			break;
+		case 'G':
+			menu_driver(menu, REQ_LAST_ITEM);
+			break;
+
+		/* search in menu */
+		case 'n':
+			menu_driver(menu, REQ_NEXT_MATCH);
+			break;
+		case 'p':
+			menu_driver(menu, REQ_PREV_MATCH);
+			break;
+		case '/': /* append to pattern match buffer */
+			wmenu_search(win_menu, menu);
+			break;
+		}
+	}
+
+	switch (c) {
+	/* select active win */
+	case '\t':
+		active_win = (active_win == win_menu) ?
+			     win_main : win_menu;
+		break;
+	}
+
+	/* menu window */
+	border_if_active(win_menu);
+	wrefresh(win_menu);
+
+	/* fields window */
+	for (i = 0; i < MENU_H && (i + top_row(menu)) < npvs &&
+	    top_row(menu) != -1; ++i)
+		mvwprintw(win_flds, i+1, 1, "%s", gpvs[i+top_row(menu)]->value);
+	wrefresh(win_flds);
+
+	/* status window */
+	mvwprintw(win_stat,0,1,"%d PVs", npvs);
+	wrefresh(win_stat);
+
+
+	if (top_row(menu) != -1)
+	{
+		/* main window */
+		wmove(win_main, 1, 1); wclrtoeol(win_main);
+		mvwaddstr(win_main, 1, 1, item_name(current_item(menu)));
+		wmove(win_main, 2, 1); wclrtoeol(win_main);
+		mvwprintw(win_main, 2, 1, "%d.",
+			  item_index(current_item(menu)));
+		wmove(win_main, 3, 1); wclrtoeol(win_main);
+		mvwprintw(win_main, 3, 1, "VAL = %s",
+			  gpvs[item_index(current_item(menu))]->value);
+		border_if_active(win_main);
+		wrefresh(win_main);
+	}
+	return c;
+}
+
