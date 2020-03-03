@@ -75,8 +75,15 @@ stop_ca()
 	ca_context_destroy();
 }
 
+void
+process_ca_events()
+{
+	ca_poll();
+}
+
 // Example of using helper functions
 
+/*
 void
 callback(struct sub_info *sub)
 {
@@ -94,8 +101,11 @@ main()
 	start_ca();
 	init_sub_info(&sub, "user:ai1", callback, NULL);
 	subscribe_pv(&sub);
-	ca_pend_event(0);
+	while (1) {
+		process_ca_events();
+	}
 	unsubscribe_pv(&sub);
 	stop_ca();
 	return 0;
 }
+*/

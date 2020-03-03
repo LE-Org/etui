@@ -32,6 +32,9 @@ void
 stop_ca();
 
 void
+process_ca_events();
+
+void
 init_sub_info(struct sub_info *sub, const char *name, sub_callback func,
     void *usr);
 
