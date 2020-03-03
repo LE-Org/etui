@@ -12,7 +12,7 @@ struct sub_info;
 typedef void sub_callback(struct sub_info *sub);
 
 struct sub_info {
-	char name[MAX_PV_NAME_SIZE];
+	char name[MAX_PV_NAME_SIZE + 1];
 	chid chid;
 	int eca_err;
 	long dbf_type;
