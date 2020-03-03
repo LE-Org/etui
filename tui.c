@@ -80,7 +80,7 @@ recreate_menu(void)
 	menu = new_menu((ITEM **)mitems);
 	set_menu_win(menu, win_menu);
 	set_menu_sub(menu, derwin(win_menu,MENU_H,MENU_W,1,1));
-	set_menu_format(menu, MENU_H, 3);
+	set_menu_format(menu, MENU_H, 1);
 	set_menu_mark(menu, "-");
 	post_menu(menu);
 }
@@ -97,6 +97,7 @@ create_items_from_pvs(void)
 		}
 		mitems[i] = new_item(gpvs[i]->name, "");
 	}
+	mitems[i] = NULL;
 }
 
 
@@ -181,9 +182,7 @@ create_tui_entry(const char *name)
 
 	/* create items */
 	create_items_from_pvs();
-	unpost_menu(menu);
-	set_menu_items(menu, mitems);
-	post_menu(menu);
+	recreate_menu();
 	wrefresh(win_menu);
 	return entry_id;
 }
