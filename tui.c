@@ -7,14 +7,16 @@
 
 #include "tui.h"
 
-#define WMENU_H (LINES - WSTAT_H)
+#define WMENU_H (LINES - WSTAT_H - WCMDS_H)
 #define WMENU_W 40
 #define WFLDS_H WMENU_H
 #define WFLDS_W 20
-#define WMAIN_H (LINES - WSTAT_H)
+#define WMAIN_H WMENU_H
 #define WMAIN_W (COLS - WMENU_W - WFLDS_W)
 #define WSTAT_H 1
 #define WSTAT_W COLS
+#define WCMDS_H 1
+#define WCMDS_W COLS
 
 #define MENU_H (WMENU_H - 2)
 #define MENU_W (WMENU_W - 2)
@@ -36,7 +38,7 @@ int process_tui_events(void);
 
 static int npvs = 0;
 static struct graphical_pv *gpvs[MAX_N_ENTRIES + 1];
-static WINDOW *win_menu, *win_flds, *win_main, *win_stat;
+static WINDOW *win_menu, *win_flds, *win_main, *win_stat, *win_cmds;
 static MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
 static WINDOW *active_win;
@@ -142,6 +144,7 @@ start_tui(void)
 	win_flds = newwin(WFLDS_H, WFLDS_H, 0, WMENU_W);
 	win_main = newwin(WMAIN_H, WMAIN_W, 0, WMENU_W + WFLDS_W);
 	win_stat = newwin(WSTAT_H, WSTAT_W, WMENU_H, 0);
+	win_cmds = newwin(WCMDS_H, WCMDS_W, WMENU_H + WSTAT_H, 0);
 
 	/* color windows */
 	wbkgd(win_stat, COLOR_PAIR(1));
@@ -265,6 +268,8 @@ process_tui_events(void)
 	mvwprintw(win_stat,0,1,"%d PVs", npvs);
 	wrefresh(win_stat);
 
+	/* commands window */
+	wrefresh(win_cmds);
 
 	if (top_row(menu) != -1)
 	{
