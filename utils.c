@@ -12,7 +12,7 @@ swallow_stderr(void)
 }
 
 void
-wait_ns(unsigned long long ns)
+wait_period(unsigned long long ns)
 {
 	static struct timespec deadline = {0};
 	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &deadline, NULL);

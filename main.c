@@ -68,7 +68,7 @@ main(int argc, char **argv)
 		if (process_tui_events() != 0)
 			break;
 
-		wait_ns(LOOP_PERIOD_NS);
+		wait_period(LOOP_PERIOD_NS);
 	}
 
 	for (i=0; i < npvs; i++) {
