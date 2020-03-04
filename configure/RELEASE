@@ -1,0 +1,3 @@
+EPICS_BASE = /code/epics/base
+
+-include $(TOP)/configure/RELEASE.local

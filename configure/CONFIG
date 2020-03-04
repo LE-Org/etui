@@ -1,0 +1,13 @@
+# CONFIG - Load build configuration data
+#
+# Do not make changes to this file!
+
+# Allow user to override where the build rules come from
+RULES = $(EPICS_BASE)
+
+CONFIG = $(RULES)/configure
+include $(CONFIG)/CONFIG
+
+# Override the Base definition:
+INSTALL_LOCATION = $(TOP)
+
