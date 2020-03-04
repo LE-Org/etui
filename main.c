@@ -81,6 +81,7 @@ process_input_file(const char *path)
 		++npvs;
 	}
 	free(line);
+	fclose(file);
 
 	return 0;
 alloc_err:
