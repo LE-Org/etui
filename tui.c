@@ -74,6 +74,7 @@ recreate_menu(void)
 		unpost_menu(menu);
 		free_menu(menu);
 	}
+	recreate_items_from_pvs();
 	menu = new_menu((ITEM **)mitems);
 	set_menu_win(menu, win_menu);
 	set_menu_sub(menu, derwin(win_menu,MENU_H,MENU_W,1,1));
@@ -145,9 +146,6 @@ start_tui(void)
 	wbkgd(win_stat, COLOR_PAIR(1));
 	active_win = win_menu;
 
-	/* create menu */
-	mitems[0] = NULL;
-	recreate_menu();
 	return 0;
 }
 
@@ -179,7 +177,6 @@ create_tui_entry(const char *name)
 	gpvs[entry_id]->value[0] = '\0';
 
 	/* create items */
-	recreate_items_from_pvs();
 	recreate_menu();
 	wrefresh(win_menu);
 	return entry_id;
