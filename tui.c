@@ -25,7 +25,7 @@
 
 #define MAX_N_ENTRIES 1500
 
-static void wmenu_search(WINDOW *, MENU *);
+static int wcmds_search(int);
 static void recreate_menu(void);
 static void recreate_items_from_pvs(void);
 static void border_if_active(WINDOW *);
@@ -43,33 +43,28 @@ static MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
 static WINDOW *active_win;
 
-static void
-wmenu_search(WINDOW *win_menu, MENU *menu)
+static int
+wcmds_search(int c)
 {
-	int c;
-	while ((c = getch()) != '\n') {
-		mvwaddch(win_menu, 1, 1, '/');
-		if (c == KEY_BACKSPACE) {
-			menu_driver(menu, REQ_BACK_PATTERN);
-		} else {
-			menu_driver(menu, c); /* TODO: check c */
-		}
+	if (c == '\n') {
+		/* hide search field */
+		wmove(win_cmds, 0, 0);
+		wclrtoeol(win_cmds);
 
-		/* update search field, but leave '/' character alone */
-		wmove(win_menu, 1, 2);
-		wclrtoeol(win_menu);
-		mvwaddstr(win_menu, 1, 2, menu_pattern(menu));
-
-		border_if_active(win_menu);
-		wrefresh(win_menu);
+		return 1;
 	}
 
-	/* hide search field */
-	wmove(win_menu, 1, 1);
-	wclrtoeol(win_menu);
+	if (c == KEY_BACKSPACE)
+		menu_driver(menu, REQ_BACK_PATTERN);
+	else
+		menu_driver(menu, c); /* TODO: check c */
 
-	border_if_active(win_menu);
-	wrefresh(win_menu);
+	/* update search field, but leave '/' character alone */
+	wmove(win_cmds, 0, 1);
+	wclrtoeol(win_cmds);
+	mvwaddstr(win_cmds, 0, 1, menu_pattern(menu));
+
+	return 0;
 }
 
 static void
@@ -204,6 +199,12 @@ process_tui_events(void)
 	int c;
 	int i;
 	c = getch();
+	if (active_win == win_cmds) {
+		if (wcmds_search(c)) { /* finish */
+			wmove(win_cmds, 0, 0); wclrtoeol(win_cmds);
+			active_win = win_menu;
+		}
+	}
 	if (active_win == win_menu) {
 		switch (c) {
 		/* menu movement */
@@ -227,22 +228,6 @@ process_tui_events(void)
 		case 'p':
 			menu_driver(menu, REQ_PREV_MATCH);
 			break;
-		case '/': /* append to pattern match buffer */
-			/* TODO: this call causes more getch(),
-			 * it would be good if we would have
-			 * only the one explicit getch() at the
-			 * top.
-			 * Solution:
-			 * 1. case '/': raises a search flag
-			 * 2. implement a new window win_cmds for searches
-			      (it will also be used for :commands)
-			 * 3. case '/': sets active_win = win_cmds
-			 * 4.           break;
-			 * 5. add an if (active_win == win_cmds)
-			 *    block in this function
-			 */
-			wmenu_search(win_menu, menu);
-			break;
 		}
 	}
 
@@ -251,6 +236,15 @@ process_tui_events(void)
 	case '\t':
 		active_win = (active_win == win_menu) ?
 			     win_main : win_menu;
+		break;
+	/* search mode */
+	case '/':
+		mvwaddch(win_cmds, 0, 0, '/');
+		active_win = win_cmds;
+		break;
+	/* command mode */
+	case ':':
+		mvwaddch(win_cmds, 0, 0, ':');
 		break;
 	}
 
