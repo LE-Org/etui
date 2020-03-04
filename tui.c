@@ -196,6 +196,8 @@ process_tui_events(void)
 	int c;
 	int i;
 	c = getch();
+	if (c == 'q') /* quit condition */
+		return 1;
 	if (active_win == win_cmds) {
 		if (wcmds_search(c)) { /* finish */
 			wmove(win_cmds, 0, 0); wclrtoeol(win_cmds);
@@ -276,6 +278,6 @@ process_tui_events(void)
 		border_if_active(win_main);
 		wrefresh(win_main);
 	}
-	return c;
+	return 0;
 }
 
