@@ -7,7 +7,7 @@
 #include "utils.h"
 
 #define FPS (20)
-#define LOOP_PERIOD (1000000000 / FPS)
+#define LOOP_PERIOD_NS (1000000000 / FPS)
 
 struct pv_entry {
 	int entry_id;
@@ -68,7 +68,7 @@ main(int argc, char **argv)
 		if (process_tui_events() != 0)
 			break;
 
-		wait_tick(LOOP_PERIOD);
+		wait_ns(LOOP_PERIOD_NS);
 	}
 
 	for (i=0; i < npvs; i++) {

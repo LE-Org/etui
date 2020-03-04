@@ -12,13 +12,13 @@ swallow_stderr(void)
 }
 
 void
-wait_tick(unsigned long long period_ns)
+wait_ns(unsigned long long ns)
 {
 	static struct timespec deadline = {0};
 	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &deadline, NULL);
 	clock_gettime(CLOCK_MONOTONIC, &deadline);
-	deadline.tv_sec += period_ns / NSEC_PER_SEC;
-	deadline.tv_nsec += period_ns % NSEC_PER_SEC;
+	deadline.tv_sec += ns / NSEC_PER_SEC;
+	deadline.tv_nsec += ns % NSEC_PER_SEC;
 	if (deadline.tv_nsec >= NSEC_PER_SEC) {
 		deadline.tv_sec++;
 		deadline.tv_nsec -= NSEC_PER_SEC;
