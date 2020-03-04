@@ -185,7 +185,7 @@ create_tui_entry(const char *name)
 	assert(entry_id < MAX_N_ENTRIES);
 	
 	gpvs[entry_id] = calloc(1, sizeof(struct graphical_pv));
-	strncpy(gpvs[entry_id]->name, name, MAX_GPV_NAME_SIZE);
+	strncpy(gpvs[entry_id]->name, name, MAX_GPV_NAME_SIZE - 1);
 	gpvs[entry_id]->value[0] = '\0';
 
 	/* create items */
