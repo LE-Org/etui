@@ -85,6 +85,15 @@ recreate_menu(void)
 }
 
 static void
+refresh_menu_items(void)
+{
+	unpost_menu(menu);
+	recreate_items_from_pvs();
+	set_menu_items(menu, mitems);
+	post_menu(menu);
+}
+
+static void
 recreate_items_from_pvs(void)
 {
 	/* state of items is altered when used, that's why this */
@@ -143,6 +152,8 @@ start_tui(void)
 	win_stat = newwin(WSTAT_H, WSTAT_W, WMENU_H, 0);
 	win_cmds = newwin(WCMDS_H, WCMDS_W, WMENU_H + WSTAT_H, 0);
 
+	recreate_menu();
+
 	/* color windows */
 	wbkgd(win_stat, COLOR_PAIR(1));
 	active_win = win_menu;
@@ -178,7 +189,7 @@ create_tui_entry(const char *name)
 	gpvs[entry_id]->value[0] = '\0';
 
 	/* create items */
-	recreate_menu();
+	refresh_menu_items();
 	wrefresh(win_menu);
 	return entry_id;
 }
