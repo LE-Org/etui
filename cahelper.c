@@ -1,7 +1,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+
 #include "cahelper.h"
+
+static void event_callback(struct event_handler_args);
+static void connection_handler(struct connection_handler_args);
+void init_sub_info(struct sub_info *, const char *, sub_callback, void *);
+int subscribe_pv(struct sub_info *);
+int unsubscribe_pv(struct sub_info *);
+int start_ca(void);
+void stop_ca(void);
+void process_ca_events(void);
 
 static void
 event_callback(struct event_handler_args ev_args)
