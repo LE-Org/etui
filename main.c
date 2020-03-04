@@ -22,12 +22,40 @@ void
 pv_entry_callback(struct sub_info *sub)
 {
 	struct pv_entry *pve = (struct pv_entry *) sub->usr;
+	void *pv = sub->value;
 	char tmp[40];
-	if (sub->dbr_type == DBR_GR_DOUBLE) {
-		struct dbr_gr_double *pv = (struct dbr_gr_double *) sub->value;
-		snprintf(tmp, 40, "%lf", pv->value);
-		update_tui_entry(pve->entry_id, tmp);
+
+	switch (sub->dbr_type) {
+//	case DBR_GR_STRING:
+//		snprintf(tmp, 40, "%s",
+//		         ((struct dbr_gr_string *)pv)->value);
+//		break;
+	case DBR_GR_INT: /* also DBR_GR_SHORT */
+		snprintf(tmp, 40, "%d",
+		         ((struct dbr_gr_int *)pv)->value);
+		break;
+	case DBR_GR_FLOAT:
+		snprintf(tmp, 40, "%g",
+		         ((struct dbr_gr_float *)pv)->value);
+		break;
+	case DBR_GR_ENUM:
+		snprintf(tmp, 40, "%d",
+		         ((struct dbr_gr_enum *)pv)->value);
+		break;
+	case DBR_GR_CHAR:
+		snprintf(tmp, 40, "%c",
+		         ((struct dbr_gr_char *)pv)->value);
+		break;
+	case DBR_GR_LONG:
+		snprintf(tmp, 40, "%d",
+		         ((struct dbr_gr_long *)pv)->value);
+		break;
+	case DBR_GR_DOUBLE:
+		snprintf(tmp, 40, "%g",
+		         ((struct dbr_gr_double *)pv)->value);
+		break;
 	}
+	update_tui_entry(pve->entry_id, tmp);
 }
 
 static void

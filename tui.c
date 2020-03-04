@@ -34,6 +34,11 @@ int start_tui(void);
 int stop_tui(void);
 int create_tui_entry(const char *);
 int update_tui_entry(int, const char *);
+static void draw_win_menu(void);
+static void draw_win_flds(void);
+static void draw_win_main(void);
+static void draw_win_stat(void);
+static void draw_win_cmds(void);
 static void draw_windows(void);
 int process_tui_events(void);
 
@@ -202,42 +207,65 @@ update_tui_entry(int entry_id, const char *value)
 	return 0;
 }
 
-void
-draw_windows()
+static void
+draw_win_menu(void)
+{
+	border_if_active(win_menu);
+	wrefresh(win_menu);
+}
+
+static void
+draw_win_flds(void)
 {
 	int i;
 
-	/* menu window */
-	border_if_active(win_menu);
-	wrefresh(win_menu);
+	if (top_row(menu) == -1)
+		return;
 
-	/* fields window */
-	for (i = 0; i < MENU_H && (i + top_row(menu)) < npvs &&
-	    top_row(menu) != -1; ++i)
-		mvwprintw(win_flds, i+1, 1, "%s", gpvs[i+top_row(menu)]->value);
+	for (i = 0; i < MENU_H && (i+top_row(menu)) < npvs; ++i)
+		mvwprintw(win_flds,i+1,1,"%s",gpvs[i+top_row(menu)]->value);
 	wrefresh(win_flds);
+}
 
-	/* status window */
+static void
+draw_win_main(void)
+{
+	if (top_row(menu) == -1)
+		return;
+
+	wmove(win_main, 1, 1); wclrtoeol(win_main);
+	mvwaddstr(win_main, 1, 1, item_name(current_item(menu)));
+	wmove(win_main, 2, 1); wclrtoeol(win_main);
+	mvwprintw(win_main, 2, 1, "%d.",
+		  item_index(current_item(menu)));
+	wmove(win_main, 3, 1); wclrtoeol(win_main);
+	mvwprintw(win_main, 3, 1, "VAL = %s",
+		  gpvs[item_index(current_item(menu))]->value);
+	border_if_active(win_main);
+	wrefresh(win_main);
+}
+
+static void
+draw_win_stat(void)
+{
 	mvwprintw(win_stat,0,1,"%d PVs", npvs);
 	wrefresh(win_stat);
+}
 
-	/* commands window */
+static void
+draw_win_cmds(void)
+{
 	wrefresh(win_cmds);
+}
 
-	if (top_row(menu) != -1)
-	{
-		/* main window */
-		wmove(win_main, 1, 1); wclrtoeol(win_main);
-		mvwaddstr(win_main, 1, 1, item_name(current_item(menu)));
-		wmove(win_main, 2, 1); wclrtoeol(win_main);
-		mvwprintw(win_main, 2, 1, "%d.",
-			  item_index(current_item(menu)));
-		wmove(win_main, 3, 1); wclrtoeol(win_main);
-		mvwprintw(win_main, 3, 1, "VAL = %s",
-			  gpvs[item_index(current_item(menu))]->value);
-		border_if_active(win_main);
-		wrefresh(win_main);
-	}
+static void
+draw_windows(void)
+{
+	draw_win_menu();
+	draw_win_flds();
+	draw_win_main();
+	draw_win_stat();
+	draw_win_cmds();
 }
 
 int
