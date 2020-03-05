@@ -25,6 +25,8 @@
 
 #define MAX_N_ENTRIES 1500
 
+#define TUI_HAS_COLORS 0x0001
+
 static int wcmds_search(int);
 static void recreate_menu(void);
 static void recreate_items_from_pvs(void);
@@ -48,6 +50,7 @@ static WINDOW *win_menu, *win_flds, *win_main, *win_stat, *win_cmds;
 static MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
 static WINDOW *active_win;
+static unsigned tui_flags = 0;
 
 static int
 wcmds_search(int c)
@@ -141,14 +144,11 @@ start_tui(void)
 	noecho();
 	keypad(stdscr, TRUE);
 	curs_set(0);
-	if (has_colors() == FALSE) /* TODO: change handling of this */
-	{
-		endwin();
-		fprintf(stderr, "Terminals doesn't have color support.\n");
-		return -3;
+	if (has_colors()) {
+		tui_flags |= TUI_HAS_COLORS;
+		start_color();
+		init_pair(1, COLOR_WHITE, COLOR_BLUE);
 	}
-	start_color();
-	init_pair(1, COLOR_BLACK, COLOR_WHITE); /* inverted */
 
 	/* define window dimensions */
 	win_menu = newwin(WMENU_H, WMENU_W, 0, 0);
@@ -160,7 +160,21 @@ start_tui(void)
 	recreate_menu();
 
 	/* color windows */
-	wbkgd(win_stat, COLOR_PAIR(1));
+	if (tui_flags & TUI_HAS_COLORS) {
+		/* win_stat */
+		wbkgd(win_stat, COLOR_PAIR(1));
+	} else {
+		int y, x;
+
+		/* win_stat */
+		/* fake wbkgd by filling spaces in reverse video */
+		wattr_on(win_stat, A_REVERSE, NULL);
+		for (y = 0; y < WSTAT_H; y++) {
+			wmove(win_stat, y, 0);
+			for (x = 0; x < WSTAT_W; x++)
+				waddstr(win_stat, " ");
+		}
+	}
 	active_win = win_menu;
 
 	return 0;
