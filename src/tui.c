@@ -7,8 +7,8 @@
 
 #include "tui.h"
 
-#define WSTAT_LINES 1
-#define WCMDS_LINES 1
+#define WSTAT_H 1
+#define WCMDS_H 1
 #define WMENU_FRAC (2)
 #define WFLDS_FRAC (1)
 #define WMAIN_FRAC (3)
@@ -89,7 +89,7 @@ recreate_windows()
 {
 	int maxy, maxx;
 	getmaxyx(stdscr, maxy, maxx);
-	wmenu_h = maxy - WSTAT_LINES - WCMDS_LINES;
+	wmenu_h = maxy - WSTAT_H - WCMDS_H;
 	wflds_h = wmain_h = wmenu_h;
 	wmenu_w = maxx * WMENU_FRAC / TOTAL_FRAC;
 	wflds_w = maxx * WFLDS_FRAC / TOTAL_FRAC;
@@ -109,8 +109,8 @@ recreate_windows()
 	win[WIN_MENU] = newwin(wmenu_h, wmenu_w, 0, 0);
 	win[WIN_FLDS] = newwin(wflds_h, wflds_w, 0, wmenu_w);
 	win[WIN_MAIN] = newwin(wmain_h, wmain_w, 0, wmenu_w + wflds_w);
-	win[WIN_STAT] = newwin(WSTAT_LINES, wstat_w, wmenu_h, 0);
-	win[WIN_CMDS] = newwin(WCMDS_LINES, wcmd_w, wmenu_h + WSTAT_LINES, 0);
+	win[WIN_STAT] = newwin(WSTAT_H, wstat_w, wmenu_h, 0);
+	win[WIN_CMDS] = newwin(WCMDS_H, wcmd_w, wmenu_h + WSTAT_H, 0);
 
 	/* color windows */
 	if (tui_flags & TUI_HAS_COLORS) {
@@ -122,7 +122,7 @@ recreate_windows()
 		/* win_stat */
 		/* fake wbkgd by filling spaces in reverse video */
 		wattr_on(win[WIN_STAT], A_REVERSE, NULL);
-		for (y = 0; y < WSTAT_LINES; y++) {
+		for (y = 0; y < WSTAT_H; y++) {
 			wmove(win[WIN_STAT], y, 0);
 			for (x = 0; x < wstat_w; x++)
 				waddstr(win[WIN_STAT], " ");
@@ -135,7 +135,7 @@ recreate_menu(void)
 {
 	int maxy, maxx;
 	getmaxyx(stdscr, maxy, maxx);
-	menu_h = maxy - WSTAT_LINES - WCMDS_LINES - 2;
+	menu_h = maxy - WSTAT_H - WCMDS_H - 2;
 	menu_w = maxx * WMENU_FRAC / TOTAL_FRAC - 2;
 	if (menu) {
 		unpost_menu(menu);
