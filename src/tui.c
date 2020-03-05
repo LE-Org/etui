@@ -181,6 +181,9 @@ set_borders()
 {
 	int i;
 	for (i=0; i < N_WINDOWS; i++) {
+		if (active_win != WIN_MENU && active_win != WIN_MAIN)
+			continue;
+
 		if (active_win == i)
 			box(win[i], 0, 0);
 		else
