@@ -7,19 +7,12 @@
 
 #include "tui.h"
 
-#define WMENU_H (LINES - WSTAT_H - WCMDS_H)
-#define WMENU_W 40
-#define WFLDS_H WMENU_H
-#define WFLDS_W 20
-#define WMAIN_H WMENU_H
-#define WMAIN_W (COLS - WMENU_W - WFLDS_W)
-#define WSTAT_H 1
-#define WSTAT_W COLS
-#define WCMDS_H 1
-#define WCMDS_W COLS
-
-#define MENU_H (WMENU_H - 2)
-#define MENU_W (WMENU_W - 2)
+#define WSTAT_LINES 1
+#define WCMDS_LINES 1
+#define WMENU_FRAC (2)
+#define WFLDS_FRAC (1)
+#define WMAIN_FRAC (3)
+#define TOTAL_FRAC (WMENU_FRAC + WFLDS_FRAC + WMAIN_FRAC)
 
 #define NC_TIMEOUT 50
 
@@ -52,6 +45,12 @@ static ITEM *mitems[MAX_N_ENTRIES + 1];
 static WINDOW *active_win;
 static unsigned tui_flags = 0;
 
+// windows dimensions
+int wmenu_h, wmenu_w, wflds_h, wflds_w;
+int wmain_h, wmain_w;
+int menu_h, menu_w;
+int wstat_w, wcmd_w;
+
 static int
 wcmds_search(int c)
 {
@@ -77,17 +76,67 @@ wcmds_search(int c)
 }
 
 static void
+recreate_windows()
+{
+	int maxy, maxx;
+	getmaxyx(stdscr, maxy, maxx);
+	wmenu_h = maxy - WSTAT_LINES - WCMDS_LINES;
+	wflds_h = wmain_h = wmenu_h;
+	wmenu_w = maxx * WMENU_FRAC / TOTAL_FRAC;
+	wflds_w = maxx * WFLDS_FRAC / TOTAL_FRAC;
+	wmain_w = maxx - wmenu_w - wflds_w;
+	wstat_w = wcmd_w = maxx;
+	if (win_menu) {
+		unpost_menu(menu);
+		free_menu(menu);
+		menu = NULL;
+		delwin(win_menu);
+		delwin(win_flds);
+		delwin(win_main);
+		delwin(win_cmds);
+	}
+	/* define window dimensions */
+	win_menu = newwin(wmenu_h, wmenu_w, 0, 0);
+	win_flds = newwin(wflds_h, wflds_w, 0, wmenu_w);
+	win_main = newwin(wmain_h, wmain_w, 0, wmenu_w + wflds_w);
+	win_stat = newwin(WSTAT_LINES, wstat_w, wmenu_h, 0);
+	win_cmds = newwin(WCMDS_LINES, wcmd_w, wmenu_h + WSTAT_LINES, 0);
+
+	/* color windows */
+	if (tui_flags & TUI_HAS_COLORS) {
+		/* win_stat */
+		wbkgd(win_stat, COLOR_PAIR(1));
+	} else {
+		int y, x;
+
+		/* win_stat */
+		/* fake wbkgd by filling spaces in reverse video */
+		wattr_on(win_stat, A_REVERSE, NULL);
+		for (y = 0; y < WSTAT_LINES; y++) {
+			wmove(win_stat, y, 0);
+			for (x = 0; x < wstat_w; x++)
+				waddstr(win_stat, " ");
+		}
+	}
+	active_win = win_menu;
+}
+
+static void
 recreate_menu(void)
 {
+	int maxy, maxx;
+	getmaxyx(stdscr, maxy, maxx);
+	menu_h = maxy - WSTAT_LINES - WCMDS_LINES - 2;
+	menu_w = maxx * WMENU_FRAC / TOTAL_FRAC - 2;
 	if (menu) {
 		unpost_menu(menu);
 		free_menu(menu);
 	}
 	recreate_items_from_pvs();
-	menu = new_menu((ITEM **)mitems);
+	menu = new_menu((ITEM **) mitems);
 	set_menu_win(menu, win_menu);
-	set_menu_sub(menu, derwin(win_menu,MENU_H,MENU_W,1,1));
-	set_menu_format(menu, MENU_H, 1);
+	set_menu_sub(menu, derwin(win_menu, menu_h, menu_w, 1, 1));
+	set_menu_format(menu, menu_h, 1);
 	set_menu_mark(menu, "-");
 	post_menu(menu);
 }
@@ -150,32 +199,9 @@ start_tui(void)
 		init_pair(1, COLOR_WHITE, COLOR_BLUE);
 	}
 
-	/* define window dimensions */
-	win_menu = newwin(WMENU_H, WMENU_W, 0, 0);
-	win_flds = newwin(WFLDS_H, WFLDS_H, 0, WMENU_W);
-	win_main = newwin(WMAIN_H, WMAIN_W, 0, WMENU_W + WFLDS_W);
-	win_stat = newwin(WSTAT_H, WSTAT_W, WMENU_H, 0);
-	win_cmds = newwin(WCMDS_H, WCMDS_W, WMENU_H + WSTAT_H, 0);
-
+	/* create panels */
+	recreate_windows();
 	recreate_menu();
-
-	/* color windows */
-	if (tui_flags & TUI_HAS_COLORS) {
-		/* win_stat */
-		wbkgd(win_stat, COLOR_PAIR(1));
-	} else {
-		int y, x;
-
-		/* win_stat */
-		/* fake wbkgd by filling spaces in reverse video */
-		wattr_on(win_stat, A_REVERSE, NULL);
-		for (y = 0; y < WSTAT_H; y++) {
-			wmove(win_stat, y, 0);
-			for (x = 0; x < WSTAT_W; x++)
-				waddstr(win_stat, " ");
-		}
-	}
-	active_win = win_menu;
 
 	return 0;
 }
@@ -236,7 +262,7 @@ draw_win_flds(void)
 	if (top_row(menu) == -1)
 		return;
 
-	for (i = 0; i < MENU_H && (i+top_row(menu)) < npvs; ++i)
+	for (i = 0; i < menu_h && (i+top_row(menu)) < npvs; ++i)
 		mvwprintw(win_flds,i+1,1,"%s",gpvs[i+top_row(menu)]->value);
 	wrefresh(win_flds);
 }
@@ -324,6 +350,10 @@ process_tui_events(void)
 			break;
 		case 'p':
 			menu_driver(menu, REQ_PREV_MATCH);
+			break;
+		case KEY_RESIZE:
+			recreate_windows();
+			recreate_menu();
 			break;
 		}
 	}
