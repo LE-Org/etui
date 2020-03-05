@@ -305,6 +305,12 @@ process_tui_events(void)
 		case KEY_UP: case 'k':
 			menu_driver(menu, REQ_UP_ITEM);
 			break;
+		case KEY_NPAGE:
+			menu_driver(menu, REQ_SCR_DPAGE);
+			break;
+		case KEY_PPAGE:
+			menu_driver(menu, REQ_SCR_UPAGE);
+			break;
 		case 'g':
 			menu_driver(menu, REQ_FIRST_ITEM);
 			break;
