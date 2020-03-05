@@ -1,17 +1,17 @@
 TOP = ..
 include $(TOP)/configure/CONFIG
 
-PROD = nccamon
+PROD = etui
 PROD_LIBS += ca
 
-nccamon_USR_CFLAGS += -pedantic -Wall -Wextra
+etui_USR_CFLAGS += -pedantic -Wall -Wextra
 
-nccamon_SYS_LIBS += ncurses
-nccamon_SYS_LIBS += menu
+etui_SYS_LIBS += ncurses
+etui_SYS_LIBS += menu
 
-nccamon_SRCS += utils.c
-nccamon_SRCS += tui.c
-nccamon_SRCS += cahelper.c
-nccamon_SRCS += main.c
+etui_SRCS += utils.c
+etui_SRCS += tui.c
+etui_SRCS += cahelper.c
+etui_SRCS += main.c
 
 include $(TOP)/configure/RULES
