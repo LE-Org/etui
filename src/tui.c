@@ -158,15 +158,6 @@ recreate_menu(void)
 }
 
 static void
-refresh_menu_items(void)
-{
-	unpost_menu(menu);
-	recreate_items_from_pvs();
-	set_menu_items(menu, mitems);
-	post_menu(menu);
-}
-
-static void
 recreate_items_from_pvs(void)
 {
 	/* state of items is altered when used, that's why this */
@@ -269,7 +260,7 @@ create_tui_entry(const char *name)
 	gpvs[entry_id]->value[0] = '\0';
 
 	/* create items */
-	refresh_menu_items();
+	recreate_menu();
 	return entry_id;
 }
 
