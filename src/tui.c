@@ -349,7 +349,11 @@ draw_win_main(void)
 static void
 draw_win_stat(void)
 {
-	mvwprintw(win[WIN_STAT],0,1,"%d PVs", npvs);
+	mvwprintw(win[WIN_STAT],0,1,
+	          "%d PVs, "
+	          "active_win = %d, "
+	          "tui_flags = 0x%04x",
+	          npvs, active_win, tui_flags);
 }
 
 static void
