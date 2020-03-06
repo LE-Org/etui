@@ -17,14 +17,24 @@
 #define NC_TIMEOUT 50
 
 #define MAX_N_ENTRIES 1500
+#define MAX_CMD        100
 
 #define TUI_HAS_COLORS 0x0001
+#define TUI_KEY_ALT    0x0002 /* Alt, getch() returns 27 then other key */
+#define TUI_KEY_ESC    0x0004 /* Esc, getch() returns 27 then ERR */
+#define TUI_WCMDS_SRCH 0x0010 /* win_cmds is in search mode */
+#define TUI_WCMDS_CMDS 0x0020 /* win_cmds is in command mode */
 #define TUI_TAB(n)    (0x0100 << ((n)-1)) /* one based */
 
 #define NTABS          6
 #define TUI_TAB_MASK   0x3f00
+#define TUI_WCMDS_MASK 0x0030
+
+#define KEY_ESC        27
 
 static int wcmds_search(int);
+static void wcmds_commands(void);
+static void process_cmd(void);
 static void recreate_menu(void);
 static void recreate_items_from_pvs(void);
 static void set_borders(void);
@@ -45,6 +55,7 @@ int process_tui_events(void);
 
 static int npvs = 0;
 static struct graphical_pv *gpvs[MAX_N_ENTRIES + 1];
+static char cmd[MAX_CMD];
 
 #define N_WINDOWS (5)
 enum {
@@ -69,14 +80,6 @@ int wstat_w, wcmd_w;
 static int
 wcmds_search(int c)
 {
-	if (c == '\n') {
-		/* hide search field */
-		wmove(win[WIN_CMDS], 0, 0);
-		wclrtoeol(win[WIN_CMDS]);
-
-		return 1;
-	}
-
 	if (c == KEY_BACKSPACE)
 		menu_driver(menu, REQ_BACK_PATTERN);
 	else
@@ -88,6 +91,26 @@ wcmds_search(int c)
 	mvwaddstr(win[WIN_CMDS], 0, 1, menu_pattern(menu));
 
 	return 0;
+}
+
+static void
+wcmds_commands(void)
+{
+	char *sol; /* start of line, adjust for wstat_w cmd overflow */
+
+	/* if strlen is less or equal to what fits, don't shift */
+	sol = cmd + strlen(cmd) - (wstat_w - 2);
+	if (sol < cmd)
+		sol = cmd;
+
+	wmove(win[WIN_CMDS], 0, 1);
+	wclrtoeol(win[WIN_CMDS]);
+	mvwaddnstr(win[WIN_CMDS], 0, 1, sol, wstat_w - 2);
+}
+
+static void
+process_cmd(void)
+{
 }
 
 static void
@@ -362,6 +385,14 @@ process_tui_events(void)
 	c = getch();
 	if (c == ERR)
 		goto refresh;
+	tui_flags &= ~(TUI_KEY_ESC|TUI_KEY_ALT);
+	if (c == KEY_ESC) {
+		c = getch();
+		if (c == ERR)
+			tui_flags |= TUI_KEY_ESC;
+		else
+			tui_flags |= TUI_KEY_ALT;
+	}
 
 	if (c == KEY_RESIZE) {
 		recreate_windows();
@@ -371,9 +402,33 @@ process_tui_events(void)
 	if (c == 'q') /* quit condition */
 		return 1;
 	if (active_win == WIN_CMDS) {
-		if (wcmds_search(c)) { /* finish */
-			wmove(win[WIN_CMDS], 0, 0); wclrtoeol(win[WIN_CMDS]);
+		static int i = 0;
+
+		if (c == '\n') { /* confirm */
+			switch (tui_flags & TUI_WCMDS_MASK) {
+			case TUI_WCMDS_CMDS: process_cmd(); break;
+			case TUI_WCMDS_SRCH: break; /* search as-you-type */
+			}
+		}
+
+		if ((tui_flags & TUI_KEY_ESC) || c == '\n') { /* cancel/finish */
+			cmd[i=0] = '\0';
+			tui_flags &= ~TUI_WCMDS_MASK;
+			werase(win[WIN_CMDS]);
 			active_win = WIN_MENU;
+		} else {
+			if (c == KEY_BACKSPACE) {
+				if (--i < 0)
+					i = 0;
+			} else if (i < MAX_CMD-1) {
+				cmd[i++] = c;
+			}
+			cmd[i] = '\0';
+
+			switch (tui_flags & TUI_WCMDS_MASK) {
+			case TUI_WCMDS_CMDS: wcmds_commands(); break;
+			case TUI_WCMDS_SRCH: wcmds_search(c); break;
+			}
 		}
 	}
 	if (active_win == WIN_MENU) {
@@ -417,21 +472,27 @@ process_tui_events(void)
 		}
 	}
 
-	switch (c) {
-	/* select active win */
-	case '\t':
-		active_win = (active_win == WIN_MENU) ?
-			     WIN_MAIN : WIN_MENU;
-		break;
-	/* search mode */
-	case '/':
-		mvwaddch(win[WIN_CMDS], 0, 0, '/');
-		active_win = WIN_CMDS;
-		break;
-	/* command mode */
-	case ':':
-		mvwaddch(win[WIN_CMDS], 0, 0, ':');
-		break;
+	if (active_win != WIN_CMDS) {
+		switch (c) {
+		/* select active win */
+		case '\t':
+			active_win = (active_win == WIN_MENU) ?
+				     WIN_MAIN : WIN_MENU;
+			break;
+		/* search mode */
+		case '/':
+			mvwaddch(win[WIN_CMDS], 0, 0, '/');
+			tui_flags |= TUI_WCMDS_SRCH;
+			active_win = WIN_CMDS;
+			break;
+		/* command mode */
+		case ':':
+			cmd[0] = '\0';
+			mvwaddch(win[WIN_CMDS], 0, 0, ':');
+			tui_flags |= TUI_WCMDS_CMDS;
+			active_win = WIN_CMDS;
+			break;
+		}
 	}
 
 refresh:
