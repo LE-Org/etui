@@ -19,11 +19,16 @@
 #define MAX_N_ENTRIES 1500
 
 #define TUI_HAS_COLORS 0x0001
+#define TUI_TAB(n)    (0x0100 << ((n)-1)) /* one based */
+
+#define NTABS          6
+#define TUI_TAB_MASK   0x3f00
 
 static int wcmds_search(int);
 static void recreate_menu(void);
 static void recreate_items_from_pvs(void);
-static void set_borders();
+static void set_borders(void);
+static int get_tab_number(void);
 static void release(void);
 int start_tui(void);
 int stop_tui(void);
@@ -35,6 +40,7 @@ static void draw_win_main(void);
 static void draw_win_stat(void);
 static void draw_win_cmds(void);
 static void draw_windows(void);
+static void refresh_windows(void);
 int process_tui_events(void);
 
 static int npvs = 0;
@@ -52,7 +58,7 @@ enum {
 static WINDOW *win[N_WINDOWS];
 static MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
-static unsigned tui_flags = 0;
+static unsigned tui_flags = 0 | TUI_TAB(1);
 
 // windows dimensions
 int wmenu_h, wmenu_w, wflds_h, wflds_w;
@@ -152,15 +158,6 @@ recreate_menu(void)
 }
 
 static void
-refresh_menu_items(void)
-{
-	unpost_menu(menu);
-	recreate_items_from_pvs();
-	set_menu_items(menu, mitems);
-	post_menu(menu);
-}
-
-static void
 recreate_items_from_pvs(void)
 {
 	/* state of items is altered when used, that's why this */
@@ -179,16 +176,28 @@ recreate_items_from_pvs(void)
 static void
 set_borders()
 {
-	int i;
-	for (i=0; i < N_WINDOWS; i++) {
-		if (active_win != WIN_MENU && active_win != WIN_MAIN)
-			continue;
-
-		if (active_win == i)
-			box(win[i], 0, 0);
-		else
-			wborder(win[i],' ',' ',' ',' ',' ',' ',' ',' ');
+	if (active_win == WIN_MENU) {
+		box(win[WIN_MENU], 0, 0);
+		wborder(win[WIN_MAIN],' ',' ',' ',' ',' ',' ',' ',' ');
+	} else if (active_win == WIN_MAIN) {
+		box(win[WIN_MAIN], 0, 0);
+		mvwprintw(win[WIN_MAIN], 0, 2, "[%d]", get_tab_number());
+		wborder(win[WIN_MENU],' ',' ',' ',' ',' ',' ',' ',' ');
 	}
+}
+
+static int
+get_tab_number(void)
+{
+	int i;
+	if (!(tui_flags & TUI_TAB_MASK))
+		return -1;
+
+	for (i = 1; i <= NTABS; i++)
+		if (tui_flags & TUI_TAB(i))
+			return i;
+
+	return -2;
 }
 
 static void
@@ -251,8 +260,7 @@ create_tui_entry(const char *name)
 	gpvs[entry_id]->value[0] = '\0';
 
 	/* create items */
-	refresh_menu_items();
-	wrefresh(win[WIN_MENU]);
+	recreate_menu();
 	return entry_id;
 }
 
@@ -267,7 +275,6 @@ update_tui_entry(int entry_id, const char *value)
 static void
 draw_win_menu(void)
 {
-	wrefresh(win[WIN_MENU]);
 }
 
 static void
@@ -280,7 +287,6 @@ draw_win_flds(void)
 
 	for (i = 0; i < menu_h && (i+top_row(menu)) < npvs; ++i)
 		mvwprintw(win[WIN_FLDS],i+1,1,"%s",gpvs[i+top_row(menu)]->value);
-	wrefresh(win[WIN_FLDS]);
 }
 
 static void
@@ -289,28 +295,43 @@ draw_win_main(void)
 	if (top_row(menu) == -1)
 		return;
 
-	wmove(win[WIN_MAIN], 1, 1); wclrtoeol(win[WIN_MAIN]);
-	mvwaddstr(win[WIN_MAIN], 1, 1, item_name(current_item(menu)));
-	wmove(win[WIN_MAIN], 2, 1); wclrtoeol(win[WIN_MAIN]);
-	mvwprintw(win[WIN_MAIN], 2, 1, "%d.",
-		  item_index(current_item(menu)));
-	wmove(win[WIN_MAIN], 3, 1); wclrtoeol(win[WIN_MAIN]);
-	mvwprintw(win[WIN_MAIN], 3, 1, "VAL = %s",
-		  gpvs[item_index(current_item(menu))]->value);
-	wrefresh(win[WIN_MAIN]);
+	werase(win[WIN_MAIN]);
+
+	switch (tui_flags & TUI_TAB_MASK) {
+	case TUI_TAB(1):
+		mvwaddstr(win[WIN_MAIN], 1, 1, item_name(current_item(menu)));
+		mvwprintw(win[WIN_MAIN], 2, 1, "%d.",
+			  item_index(current_item(menu)));
+		mvwprintw(win[WIN_MAIN], 3, 1, "VAL = %s",
+			  gpvs[item_index(current_item(menu))]->value);
+		break;
+	case TUI_TAB(2):
+		mvwprintw(win[WIN_MAIN], 1, 1, "TAB2");
+		break;
+	case TUI_TAB(3):
+		mvwprintw(win[WIN_MAIN], 1, 1, "TAB3");
+		break;
+	case TUI_TAB(4):
+		mvwprintw(win[WIN_MAIN], 1, 1, "TAB4");
+		break;
+	case TUI_TAB(5):
+		mvwprintw(win[WIN_MAIN], 1, 1, "TAB5");
+		break;
+	case TUI_TAB(6):
+		mvwprintw(win[WIN_MAIN], 1, 1, "TAB6");
+		break;
+	}
 }
 
 static void
 draw_win_stat(void)
 {
 	mvwprintw(win[WIN_STAT],0,1,"%d PVs", npvs);
-	wrefresh(win[WIN_STAT]);
 }
 
 static void
 draw_win_cmds(void)
 {
-	wrefresh(win[WIN_CMDS]);
 }
 
 static void
@@ -323,12 +344,25 @@ draw_windows(void)
 	draw_win_cmds();
 }
 
+static void
+refresh_windows(void)
+{
+	wrefresh(win[WIN_MENU]);
+	wrefresh(win[WIN_FLDS]);
+	wrefresh(win[WIN_MAIN]);
+	wrefresh(win[WIN_STAT]);
+	wrefresh(win[WIN_CMDS]);
+}
+
 int
 process_tui_events(void)
 {
 	int c;
 
 	c = getch();
+	if (c == ERR)
+		goto refresh;
+
 	if (c == KEY_RESIZE) {
 		recreate_windows();
 		recreate_menu();
@@ -373,6 +407,15 @@ process_tui_events(void)
 			break;
 		}
 	}
+	if (active_win == WIN_MAIN) {
+		switch (c) {
+		/* tabs */
+		case '1': case '2': case '3': case '4': case '5': case '6':
+			tui_flags &= ~TUI_TAB_MASK;
+			tui_flags |= TUI_TAB(c-'0');
+			break;
+		}
+	}
 
 	switch (c) {
 	/* select active win */
@@ -391,8 +434,10 @@ process_tui_events(void)
 		break;
 	}
 
-	set_borders();
-	draw_windows();
+refresh:
+	draw_windows();      /* set_borders should be called after, so that we */
+	set_borders();       /* are free to use wclear inside of draw_windows  */
+	refresh_windows();   /* we can refresh only after both are done */
 
 	return 0;
 }
