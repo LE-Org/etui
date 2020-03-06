@@ -23,7 +23,7 @@
 static int wcmds_search(int);
 static void recreate_menu(void);
 static void recreate_items_from_pvs(void);
-static void set_borders();
+static void set_borders(void);
 static void release(void);
 int start_tui(void);
 int stop_tui(void);
