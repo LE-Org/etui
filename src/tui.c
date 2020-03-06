@@ -329,6 +329,9 @@ process_tui_events(void)
 	int c;
 
 	c = getch();
+	if (c == ERR)
+		goto refresh;
+
 	if (c == KEY_RESIZE) {
 		recreate_windows();
 		recreate_menu();
@@ -391,6 +394,7 @@ process_tui_events(void)
 		break;
 	}
 
+refresh:
 	set_borders();
 	draw_windows();
 
