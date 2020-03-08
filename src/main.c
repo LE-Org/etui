@@ -93,7 +93,7 @@ main(int argc, char **argv)
 	for(;;) {
 		process_ca_events();
 
-		if (process_tui_events() != 0)
+		if (process_tui_events() == C_QUIT)
 			break;
 
 		wait_period(LOOP_PERIOD_NS);
