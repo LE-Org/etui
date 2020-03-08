@@ -4,6 +4,8 @@
 #define MAX_GPV_NAME_SIZE 41
 #define MAX_GPV_VALUE_SIZE 41
 
+enum cmd_code { C_NONE = 0, C_QUIT = 1 };
+
 struct graphical_pv {
   char name[MAX_GPV_NAME_SIZE];
   char value[MAX_GPV_VALUE_SIZE];

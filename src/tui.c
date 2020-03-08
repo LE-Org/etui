@@ -34,7 +34,7 @@
 
 static int wcmds_search(int);
 static void wcmds_commands(void);
-static void process_cmd(void);
+static int process_cmd(void);
 static void recreate_menu(void);
 static void recreate_items_from_pvs(void);
 static void set_borders(void);
@@ -108,9 +108,22 @@ wcmds_commands(void)
 	mvwaddnstr(win[WIN_CMDS], 0, 1, sol, wstat_w - 2);
 }
 
-static void
+static int
 process_cmd(void)
 {
+	enum cmd_code code = C_NONE;
+	char *cmd_;
+
+	cmd_ = strtok(cmd, " \t");
+	if (!strcmp(cmd_, "quit") || !strcmp(cmd_, "q")) {
+		code = C_QUIT;
+	}
+
+	/* only commands with no trash at the end are valid */
+	if (strtok(NULL, " \t") == NULL)
+		return code;
+
+	return C_NONE;
 }
 
 static void
@@ -385,6 +398,7 @@ int
 process_tui_events(void)
 {
 	int c;
+	enum cmd_code code = C_NONE;
 
 	c = getch();
 	if (c == ERR)
@@ -401,18 +415,18 @@ process_tui_events(void)
 	if (c == KEY_RESIZE) {
 		recreate_windows();
 		recreate_menu();
-		return 0;
+		return C_NONE;
 	}
-	if (c == 'q') /* quit condition */
-		return 1;
 	if (active_win == WIN_CMDS) {
 		static int i = 0;
 
 		if (c == '\n') { /* confirm */
 			switch (flags & TUI_WCMDS_MASK) {
-			case F_WCMDS_CMDS: process_cmd(); break;
+			case F_WCMDS_CMDS: code = process_cmd(); break;
 			case F_WCMDS_SRCH: break; /* search as-you-type */
 			}
+			if (code != C_NONE)
+				goto refresh;
 		}
 
 		if ((flags & F_KEY_ESC) || c == '\n') { /* cancel/finish */
@@ -504,6 +518,6 @@ refresh:
 	set_borders();       /* are free to use wclear inside of draw_windows  */
 	refresh_windows();   /* we can refresh only after both are done */
 
-	return 0;
+	return code;
 }
 
