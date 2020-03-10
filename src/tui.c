@@ -29,17 +29,17 @@ recreate_windows()
 	wmenu_h = maxy - WSTAT_H - WCMDS_H;
 	wflds_h = wmain_h = wmenu_h;
 	wstat_h = WSTAT_H;
-	wcmd_h = WCMDS_H;
+	wcmds_h = WCMDS_H;
 	wmenu_w = maxx * WMENU_FRAC / TOTAL_FRAC;
 	wflds_w = maxx * WFLDS_FRAC / TOTAL_FRAC;
 	wmain_w = maxx - wmenu_w - wflds_w;
-	wstat_w = wcmd_w = maxx;
+	wstat_w = wcmds_w = maxx;
 
 	/* define window dimensions */
 	windows[WIN_MENU]->recreate(wmenu_h, wmenu_w, 0, 0);
 	windows[WIN_FLDS]->recreate(wflds_h, wflds_w, 0, wmenu_w);
 	windows[WIN_MAIN]->recreate(wmain_h, wmain_w, 0, wmenu_w + wflds_w);
-	windows[WIN_CMDS]->recreate(wcmd_h, wcmd_w, wmenu_h + wstat_h, 0);
+	windows[WIN_CMDS]->recreate(wcmds_h, wcmds_w, wmenu_h + wstat_h, 0);
 	windows[WIN_STAT]->recreate(wstat_h, wstat_w, wmenu_h, 0);
 }
 

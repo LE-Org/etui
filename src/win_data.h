@@ -20,7 +20,7 @@ extern int wmenu_h, wmenu_w;
 extern int wflds_h, wflds_w;
 extern int wmain_h, wmain_w;
 extern int wstat_h, wstat_w;
-extern int wcmd_h, wcmd_w;
+extern int wcmds_h, wcmds_w;
 extern int menu_h, menu_w;
 
 extern int want_quit;
