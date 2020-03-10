@@ -62,7 +62,7 @@ start_tui(void)
 
 	/* create panels */
 	recreate_windows();
-	windows_select(WIN_MENU, 1);
+	windows_select(WIN_MENU);
 
 	return 0;
 }
@@ -129,26 +129,26 @@ process_tui_events(void)
 	if (want_quit)
 		return C_QUIT;
 
-	if (active_win != WIN_CMDS) {
+	if (!windows[WIN_CMDS]->selected) {
 		switch (c) {
 		/* select active win */
 		case '\t':
-			windows_select(active_win, 0);
-			active_win = (active_win == WIN_MENU) ?
-				     WIN_MAIN : WIN_MENU;
-			windows_select(active_win, 1);
+			if (windows[WIN_MENU]->selected)
+				windows_select(WIN_MAIN);
+			else
+				windows_select(WIN_MENU);
 			break;
 		/* search mode */
 		case '/':
 			win_flags |= F_WCMDS_SRCH;
 			windows_visible(WIN_CMDS, 1);
-			active_win = WIN_CMDS;
+			windows_select(WIN_CMDS);
 			break;
 		/* command mode */
 		case ':':
 			win_flags |= F_WCMDS_CMDS;
 			windows_visible(WIN_CMDS, 1);
-			active_win = WIN_CMDS;
+			windows_select(WIN_CMDS);
 			break;
 		}
 	}

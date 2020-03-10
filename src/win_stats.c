@@ -36,9 +36,8 @@ stats_draw(void)
 {
 	mvwprintw(win, 0, 1,
 	          "%d PVs, "
-	          "active_win = %d, "
 	          "win_flags = 0x%04x",
-	          npvs, active_win, win_flags);
+	          npvs, win_flags);
 }
 
 static void

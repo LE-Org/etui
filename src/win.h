@@ -9,8 +9,8 @@ struct win {
 	void (*_refresh)(void);
 	void (*release)(void);
 	void (*on_data_changed)(void);
-	void (*select)(int state);
 	void (*visible)(int state);
+	int selected;
 };
 
 void windows_draw(void);
@@ -18,7 +18,7 @@ void windows_handle_key(int c);
 void windows_refresh(void);
 void windows_release(void);
 void windows_on_data_changed(void);
-void windows_select(int win_id, int status);
 void windows_visible(int win_id, int status);
+void windows_select(int win_id);
 
 #endif

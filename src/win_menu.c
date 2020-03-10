@@ -5,7 +5,6 @@
 
 MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
-static int selected = 0;
 static WINDOW *win;
 
 static void
@@ -42,7 +41,7 @@ recreate_menu(void)
 static void
 menu_set_borders()
 {
-	if (selected)
+	if (windows[WIN_MENU]->selected)
 		box(win, 0, 0);
 	else
 		wborder(win,' ',' ',' ',' ',' ',' ',' ',' ');
@@ -90,12 +89,6 @@ menu_release()
 }
 
 static void
-menu_select(int status)
-{
-	selected = status;
-}
-
-static void
 menu_data_changed(void)
 {
 	recreate_menu();
@@ -112,10 +105,6 @@ menu_handle_key(int c)
 	case KEY_PPAGE:           menu_driver(menu, REQ_SCR_UPAGE);  break;
 	case 'g'      :           menu_driver(menu, REQ_FIRST_ITEM); break;
 	case 'G'      :           menu_driver(menu, REQ_LAST_ITEM);  break;
-
-	/* search in menu */
-	case 'n':                 menu_driver(menu, REQ_NEXT_MATCH); break;
-	case 'p':                 menu_driver(menu, REQ_PREV_MATCH); break;
 	}
 }
 
@@ -124,7 +113,6 @@ static struct win menu_win_data = {
 	.draw            = menu_draw,
 	._refresh        = menu_refresh,
 	.release         = menu_release,
-	.select          = menu_select,
 	.on_data_changed = menu_data_changed,
 	.handle_key      = menu_handle_key
 };

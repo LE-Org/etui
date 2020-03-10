@@ -1,6 +1,7 @@
 #include <string.h>
 #include <curses.h>
 #include <menu.h>
+#include <regex.h>
 #include "win.h"
 #include "win_cmds.h"
 #include "win_data.h"
@@ -55,17 +56,34 @@ cmds_visible(int status)
 }
 
 static int
-wcmds_search(int c)
+wcmds_search(void)
 {
-	if (c == KEY_BACKSPACE)
-		menu_driver(menu, REQ_BACK_PATTERN);
-	else
-		menu_driver(menu, c); /* TODO: check c */
+	int i, off, n;
+	ITEM *item, *match;
+	regex_t preg;
+
+	n = item_count(menu);
+	off = item_index(current_item(menu));
+
+	regcomp(&preg, cmd, REG_NOSUB | REG_EXTENDED);
+
+	match = NULL;
+	for (i = 0; i < n; ++i) {
+		item = menu->items[(i+off)%n];
+		if (regexec(&preg, item->name.str,0,0,0) == 0) {
+			match = item;
+			break;
+		}
+	}
+	regfree(&preg);
+
+	if (match)
+		set_current_item(menu, match);
 
 	/* update search field, but leave '/' character alone */
 	wmove(win, 0, 1);
 	wclrtoeol(win);
-	mvwaddstr(win, 0, 1, menu_pattern(menu));
+	mvwaddstr(win, 0, 1, cmd);
 
 	return 0;
 }
@@ -91,6 +109,10 @@ process_cmd(void)
 	char *cmd_;
 
 	cmd_ = strtok(cmd, " \t");
+
+	if (!cmd_)
+		return 0;
+
 	if (!strcmp(cmd_, "quit") || !strcmp(cmd_, "q")) {
 		want_quit = 1;
 		return 1;
@@ -126,7 +148,7 @@ cmds_handle_key(int c)
 		cmd[i=0] = '\0';
 		win_flags &= ~TUI_WCMDS_MASK;
 		windows_visible(WIN_CMDS, 0);
-		active_win = WIN_MENU;
+		windows_select(WIN_MENU);
 	} else {
 		if (c == KEY_BACKSPACE) {
 			if (--i < 0)
@@ -138,7 +160,7 @@ cmds_handle_key(int c)
 
 		switch (win_flags & TUI_WCMDS_MASK) {
 		case F_WCMDS_CMDS: wcmds_commands(); break;
-		case F_WCMDS_SRCH: wcmds_search(c); break;
+		case F_WCMDS_SRCH: wcmds_search(); break;
 		}
 	}
 }
