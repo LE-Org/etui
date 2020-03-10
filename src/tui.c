@@ -166,8 +166,8 @@ process_tui_events(void)
 	}
 
 end_refresh:
-	windows_draw();      /* set_borders should be called after, so that we */
-	windows_refresh();   /* we can refresh only after both are done */
+	windows_draw();
+	windows_refresh();
 
 	return code;
 }
