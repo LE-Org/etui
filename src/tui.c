@@ -21,14 +21,6 @@
 
 #define NC_TIMEOUT 50
 
-/* windows dimensions */
-int wmenu_h, wmenu_w;
-int wflds_h, wflds_w;
-int wmain_h, wmain_w;
-int wstat_h, wstat_w;
-int wcmd_h, wcmd_w;
-int menu_h, menu_w;
-
 static void
 recreate_windows()
 {

@@ -1,5 +1,4 @@
 #include <curses.h>
-#include "tui.h"
 #include "win.h"
 #include "win_data.h"
 #include "win_menu.h"
