@@ -1,4 +1,5 @@
 #include <curses.h>
+#include "tui.h"
 #include "win.h"
 #include "win_data.h"
 #include "win_menu.h"
@@ -6,8 +7,6 @@
 MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
 static int selected = 0;
-int menu_h;
-int menu_w;
 static WINDOW *win;
 
 static void
