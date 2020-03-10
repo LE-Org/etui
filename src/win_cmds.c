@@ -41,10 +41,10 @@ static void
 cmds_visible(int status)
 {
 	if (status) {
-		if (win_flags | F_WCMDS_CMDS) {
+		if (win_flags & F_WCMDS_CMDS) {
 			cmd[0] = '\0';
 			mvwaddch(win, 0, 0, ':');
-		} else if (win_flags | F_WCMDS_SRCH) {
+		} else if (win_flags & F_WCMDS_SRCH) {
 			cmd[0] = '\0';
 			mvwaddch(win, 0, 0, '/');
 		}
