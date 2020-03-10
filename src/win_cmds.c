@@ -91,6 +91,10 @@ process_cmd(void)
 	char *cmd_;
 
 	cmd_ = strtok(cmd, " \t");
+
+	if (!cmd_)
+		return 0;
+
 	if (!strcmp(cmd_, "quit") || !strcmp(cmd_, "q")) {
 		want_quit = 1;
 		return 1;
