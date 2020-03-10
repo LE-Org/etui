@@ -3,7 +3,7 @@
 #include "win_registrar.h"
 
 struct win {
-	void (*recreate_window)(int h, int w, int y, int x);
+	void (*recreate)(int h, int w, int y, int x);
 	void (*draw)(void);
 	void (*handle_key)(int c);
 	void (*_refresh)(void);

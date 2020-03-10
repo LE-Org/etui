@@ -48,13 +48,11 @@ recreate_windows()
 	wstat_w = wcmd_w = maxx;
 
 	/* define window dimensions */
-	windows[WIN_MENU]->recreate_window(wmenu_h, wmenu_w, 0, 0);
-	windows[WIN_FLDS]->recreate_window(wflds_h, wflds_w, 0, wmenu_w);
-	windows[WIN_MAIN]->recreate_window(wmain_h, wmain_w, 0,
-	    wmenu_w + wflds_w);
-	windows[WIN_CMDS]->recreate_window(WCMDS_H, wcmd_w, wmenu_h + WSTAT_H,
-	    0);
-	windows[WIN_STAT]->recreate_window(WSTAT_H, wstat_w, wmenu_h, 0);
+	windows[WIN_MENU]->recreate(wmenu_h, wmenu_w, 0, 0);
+	windows[WIN_FLDS]->recreate(wflds_h, wflds_w, 0, wmenu_w);
+	windows[WIN_MAIN]->recreate(wmain_h, wmain_w, 0, wmenu_w + wflds_w);
+	windows[WIN_CMDS]->recreate(WCMDS_H, wcmd_w, wmenu_h + WSTAT_H, 0);
+	windows[WIN_STAT]->recreate(WSTAT_H, wstat_w, wmenu_h, 0);
 }
 
 int

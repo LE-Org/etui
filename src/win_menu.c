@@ -51,7 +51,7 @@ menu_set_borders()
 }
 
 static void
-menu_recreate_window(int h, int w, int y, int x)
+menu_recreate(int h, int w, int y, int x)
 {
 	if (win) {
 		unpost_menu(menu);
@@ -122,7 +122,7 @@ menu_handle_key(int c)
 }
 
 static struct win menu_win_data = {
-	.recreate_window = menu_recreate_window,
+	.recreate        = menu_recreate,
 	.draw            = menu_draw,
 	._refresh        = menu_refresh,
 	.release         = menu_release,

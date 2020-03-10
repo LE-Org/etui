@@ -12,7 +12,7 @@ static char visible = 0;
 static WINDOW *win;
 
 static void
-cmds_recreate_window(int h, int w, int y, int x)
+cmds_recreate(int h, int w, int y, int x)
 {
 	if (win)
 		delwin(win);
@@ -144,12 +144,12 @@ cmds_handle_key(int c)
 }
 
 static struct win cmds_win_data = {
-	.recreate_window = cmds_recreate_window,
-	.draw            = cmds_draw,
-	._refresh        = cmds_refresh,
-	.release         = cmds_release,
-	.visible         = cmds_visible,
-	.handle_key      = cmds_handle_key
+	.recreate   = cmds_recreate,
+	.draw       = cmds_draw,
+	._refresh   = cmds_refresh,
+	.release    = cmds_release,
+	.visible    = cmds_visible,
+	.handle_key = cmds_handle_key
 };
 
 REGISTER_WINDOW(WIN_CMDS, &cmds_win_data);
