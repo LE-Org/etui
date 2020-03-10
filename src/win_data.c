@@ -11,7 +11,6 @@ int menu_h, menu_w;
 
 int want_quit = 0;
 unsigned win_flags = 0 | F_TAB(1);
-enum win_func active_win;
 int npvs = 0;
 struct graphical_pv *gpvs[MAX_N_ENTRIES + 1];
 

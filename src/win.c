@@ -32,10 +32,16 @@ windows_release(void)
 }
 
 void
-windows_select(int win_id, int status)
+windows_select(int win_id)
 {
-	if (windows[win_id]->select)
-		windows[win_id]->select(status);
+	int i;
+
+	if (!windows[win_id])
+		return;
+	for (i=0; i < n_windows; i++)
+		if(windows[i])
+			windows[i]->selected = 0;
+	windows[win_id]->selected = 1;
 }
 
 void
@@ -60,7 +66,8 @@ windows_handle_key(int c)
 {
 	int i;
 	for (i=0; i < n_windows; i++) {
-		if (windows[i] && windows[i]->handle_key)
+		if (windows[i] && windows[i]->handle_key &&
+		    windows[i]->selected)
 			windows[i]->handle_key(c);
 	}
 }

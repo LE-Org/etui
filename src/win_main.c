@@ -5,7 +5,6 @@
 #include "win_data.h"
 #include "win_menu.h"
 
-static char selected = 0;
 static WINDOW *win;
 
 static void
@@ -33,7 +32,7 @@ get_tab_number(void)
 static void
 set_borders(void)
 {
-	if (selected) {
+	if (windows[WIN_MAIN]->selected) {
 		box(win, 0, 0);
 		mvwprintw(win, 0, 2, "[%d]", get_tab_number());
 	} else {
@@ -90,15 +89,9 @@ main_release(void)
 }
 
 static void
-main_select(int status)
-{
-	selected = status;
-}
-
-static void
 main_handle_key(int c)
 {
-	if (!selected)
+	if (!windows[WIN_MAIN]->selected)
 		return;
 
 	switch (c) {
@@ -115,7 +108,6 @@ static struct win main_win_data = {
 	.draw       = main_draw,
 	._refresh   = main_refresh,
 	.release    = main_release,
-	.select     = main_select,
 	.handle_key = main_handle_key
 };
 

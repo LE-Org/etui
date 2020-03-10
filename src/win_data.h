@@ -34,8 +34,6 @@ enum win_func {
 	WIN_STAT
 };
 
-extern enum win_func active_win;
-
 struct graphical_pv {
 	char name[MAX_GPV_NAME_SIZE];
 	char value[MAX_GPV_VALUE_SIZE];

@@ -161,7 +161,7 @@ cmds_handle_key(int c)
 		cmd[i=0] = '\0';
 		win_flags &= ~TUI_WCMDS_MASK;
 		windows_visible(WIN_CMDS, 0);
-		active_win = WIN_MENU;
+		windows_select(WIN_MENU);
 	} else {
 		if (c == KEY_BACKSPACE) {
 			if (--i < 0)
