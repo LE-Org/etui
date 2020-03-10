@@ -58,35 +58,22 @@ cmds_visible(int status)
 static int
 wcmds_search(void)
 {
-	int i, ic;
-	ITEM *item, *topitem, *match;
+	int i, off, n;
+	ITEM *item, *match;
 	regex_t preg;
 
-	/* find menu's top item */
-	ic = item_count(menu);
-	topitem = menu->items[0];
-	for (i = 0; i < ic; i++) {
-		if (menu->items[i]->y == 0) {
-			topitem = menu->items[i];
-			break;
-		}
-	}
+	n = item_count(menu);
+	off = item_index(current_item(menu));
 
 	regcomp(&preg, cmd, REG_NOSUB | REG_EXTENDED);
 
 	match = NULL;
-	for (i = 0, item = current_item(menu); i < ic; ++i) {
+	for (i = 0; i < n; ++i) {
+		item = menu->items[(i+off)%n];
 		if (regexec(&preg, item->name.str,0,0,0) == 0) {
 			match = item;
 			break;
 		}
-
-		if (item->y == ic - 1)
-			item = topitem;
-		else if (item->down)
-			item = item->down;
-		else
-			item = menu->items[0]; /* NOTREACHED */
 	}
 	regfree(&preg);
 
