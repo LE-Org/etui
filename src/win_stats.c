@@ -2,8 +2,6 @@
 #include "win.h"
 #include "win_data.h"
 
-int wstat_h;
-int wstat_w;
 static WINDOW *win;
 
 static void

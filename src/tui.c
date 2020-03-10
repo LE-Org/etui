@@ -21,19 +21,6 @@
 
 #define NC_TIMEOUT 50
 
-int start_tui(void);
-int stop_tui(void);
-int create_tui_entry(const char *);
-int update_tui_entry(int, const char *);
-int process_tui_events(void);
-
-/* windows dimensions */
-int wmenu_h, wmenu_w;
-int wflds_h, wflds_w;
-int wmain_h, wmain_w;
-int wstat_w, wcmd_w;
-int menu_h, menu_w;
-
 static void
 recreate_windows()
 {
@@ -41,6 +28,8 @@ recreate_windows()
 	getmaxyx(stdscr, maxy, maxx);
 	wmenu_h = maxy - WSTAT_H - WCMDS_H;
 	wflds_h = wmain_h = wmenu_h;
+	wstat_h = WSTAT_H;
+	wcmd_h = WCMDS_H;
 	wmenu_w = maxx * WMENU_FRAC / TOTAL_FRAC;
 	wflds_w = maxx * WFLDS_FRAC / TOTAL_FRAC;
 	wmain_w = maxx - wmenu_w - wflds_w;
@@ -50,8 +39,8 @@ recreate_windows()
 	windows[WIN_MENU]->recreate(wmenu_h, wmenu_w, 0, 0);
 	windows[WIN_FLDS]->recreate(wflds_h, wflds_w, 0, wmenu_w);
 	windows[WIN_MAIN]->recreate(wmain_h, wmain_w, 0, wmenu_w + wflds_w);
-	windows[WIN_CMDS]->recreate(WCMDS_H, wcmd_w, wmenu_h + WSTAT_H, 0);
-	windows[WIN_STAT]->recreate(WSTAT_H, wstat_w, wmenu_h, 0);
+	windows[WIN_CMDS]->recreate(wcmd_h, wcmd_w, wmenu_h + wstat_h, 0);
+	windows[WIN_STAT]->recreate(wstat_h, wstat_w, wmenu_h, 0);
 }
 
 int

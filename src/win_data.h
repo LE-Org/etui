@@ -16,6 +16,13 @@
 #define F_WCMDS_CMDS   0x0020 /* win_cmds is in command mode */
 #define F_TAB(n)      (0x0100 << ((n)-1)) /* one based */
 
+extern int wmenu_h, wmenu_w;
+extern int wflds_h, wflds_w;
+extern int wmain_h, wmain_w;
+extern int wstat_h, wstat_w;
+extern int wcmd_h, wcmd_w;
+extern int menu_h, menu_w;
+
 extern int want_quit;
 extern unsigned win_flags;
 

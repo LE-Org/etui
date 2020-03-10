@@ -6,8 +6,6 @@
 MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
 static int selected = 0;
-int menu_h;
-int menu_w;
 static WINDOW *win;
 
 static void
