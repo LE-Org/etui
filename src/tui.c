@@ -21,12 +21,6 @@
 
 #define NC_TIMEOUT 50
 
-int start_tui(void);
-int stop_tui(void);
-int create_tui_entry(const char *);
-int update_tui_entry(int, const char *);
-int process_tui_events(void);
-
 /* windows dimensions */
 int wmenu_h, wmenu_w;
 int wflds_h, wflds_w;
