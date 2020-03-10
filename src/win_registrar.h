@@ -13,7 +13,6 @@ void register_window(int win_id, struct win *win);
 	_register_window() \
 	{ \
 		register_window(win_id, win); \
-		n_windows++; \
 	} \
 	void \
 	__attribute__((__section__(".init_array"))) (*_regwin_##win_id)() = _register_window
