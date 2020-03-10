@@ -11,9 +11,8 @@ static WINDOW *win;
 static void
 main_recreate_window(int h, int w, int y, int x)
 {
-	if (win) {
+	if (win)
 		delwin(win);
-	}
 	win = newwin(h, w, y, x);
 }
 
@@ -111,15 +110,13 @@ main_handle_key(int c)
 	}
 }
 
-
-
 static struct win main_win_data = {
-	.recreate_window=main_recreate_window,
-	.draw=main_draw,
-	._refresh=main_refresh,
-	.release=main_release,
-	.select=main_select,
-	.handle_key=main_handle_key
+	.recreate_window = main_recreate_window,
+	.draw            = main_draw,
+	._refresh        = main_refresh,
+	.release         = main_release,
+	.select          = main_select,
+	.handle_key      = main_handle_key
 };
 
 REGISTER_WINDOW(WIN_MAIN, &main_win_data);

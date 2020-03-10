@@ -28,11 +28,12 @@ int create_tui_entry(const char *);
 int update_tui_entry(int, const char *);
 int process_tui_events(void);
 
-// windows dimensions
-int wmenu_h, wmenu_w, wflds_h, wflds_w;
+/* windows dimensions */
+int wmenu_h, wmenu_w;
+int wflds_h, wflds_w;
 int wmain_h, wmain_w;
-int menu_h, menu_w;
 int wstat_w, wcmd_w;
+int menu_h, menu_w;
 
 static void
 recreate_windows()

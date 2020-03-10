@@ -10,8 +10,8 @@ struct graphical_pv *gpvs[MAX_N_ENTRIES + 1];
 void
 release_data(void)
 {
-    int i;
-    for (i=0; i < npvs; i++)
-	free(gpvs[i]);
+	int i;
+	for (i=0; i < npvs; i++)
+		free(gpvs[i]);
 }
 

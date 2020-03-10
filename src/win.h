@@ -13,18 +13,12 @@ struct win {
 	void (*visible)(int state);
 };
 
-void windows_select(int win_id, int status);
-
-void windows_visible(int win_id, int status);
-
-void windows_release(void);
-
-void windows_on_data_changed(void);
-
 void windows_draw(void);
-
 void windows_handle_key(int c);
-
 void windows_refresh(void);
+void windows_release(void);
+void windows_on_data_changed(void);
+void windows_select(int win_id, int status);
+void windows_visible(int win_id, int status);
 
 #endif
