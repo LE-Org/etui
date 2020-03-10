@@ -112,10 +112,6 @@ menu_handle_key(int c)
 	case KEY_PPAGE:           menu_driver(menu, REQ_SCR_UPAGE);  break;
 	case 'g'      :           menu_driver(menu, REQ_FIRST_ITEM); break;
 	case 'G'      :           menu_driver(menu, REQ_LAST_ITEM);  break;
-
-	/* search in menu */
-	case 'n':                 menu_driver(menu, REQ_NEXT_MATCH); break;
-	case 'p':                 menu_driver(menu, REQ_PREV_MATCH); break;
 	}
 }
 

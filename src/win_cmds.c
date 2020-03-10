@@ -1,6 +1,7 @@
 #include <string.h>
 #include <curses.h>
 #include <menu.h>
+#include <regex.h>
 #include "win.h"
 #include "win_cmds.h"
 #include "win_data.h"
@@ -55,17 +56,47 @@ cmds_visible(int status)
 }
 
 static int
-wcmds_search(int c)
+wcmds_search(void)
 {
-	if (c == KEY_BACKSPACE)
-		menu_driver(menu, REQ_BACK_PATTERN);
-	else
-		menu_driver(menu, c); /* TODO: check c */
+	int i, ic;
+	ITEM *item, *topitem, *match;
+	regex_t preg;
+
+	/* find menu's top item */
+	ic = item_count(menu);
+	topitem = menu->items[0];
+	for (i = 0; i < ic; i++) {
+		if (menu->items[i]->y == 0) {
+			topitem = menu->items[i];
+			break;
+		}
+	}
+
+	regcomp(&preg, cmd, REG_NOSUB | REG_EXTENDED);
+
+	match = NULL;
+	for (i = 0, item = current_item(menu); i < ic; ++i) {
+		if (regexec(&preg, item->name.str,0,0,0) == 0) {
+			match = item;
+			break;
+		}
+
+		if (item->y == ic - 1)
+			item = topitem;
+		else if (item->down)
+			item = item->down;
+		else
+			item = menu->items[0]; /* NOTREACHED */
+	}
+	regfree(&preg);
+
+	if (match)
+		set_current_item(menu, match);
 
 	/* update search field, but leave '/' character alone */
 	wmove(win, 0, 1);
 	wclrtoeol(win);
-	mvwaddstr(win, 0, 1, menu_pattern(menu));
+	mvwaddstr(win, 0, 1, cmd);
 
 	return 0;
 }
@@ -142,7 +173,7 @@ cmds_handle_key(int c)
 
 		switch (win_flags & TUI_WCMDS_MASK) {
 		case F_WCMDS_CMDS: wcmds_commands(); break;
-		case F_WCMDS_SRCH: wcmds_search(c); break;
+		case F_WCMDS_SRCH: wcmds_search(); break;
 		}
 	}
 }
