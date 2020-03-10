@@ -5,7 +5,6 @@
 
 #include "tui.h"
 #include "win.h"
-#include "win_registrar.h"
 #include "win_data.h"
 #include "win_menu.h"
 #include "win_fields.h"
@@ -28,11 +27,12 @@ int create_tui_entry(const char *);
 int update_tui_entry(int, const char *);
 int process_tui_events(void);
 
-// windows dimensions
-int wmenu_h, wmenu_w, wflds_h, wflds_w;
+/* windows dimensions */
+int wmenu_h, wmenu_w;
+int wflds_h, wflds_w;
 int wmain_h, wmain_w;
-int menu_h, menu_w;
 int wstat_w, wcmd_w;
+int menu_h, menu_w;
 
 static void
 recreate_windows()
@@ -47,13 +47,11 @@ recreate_windows()
 	wstat_w = wcmd_w = maxx;
 
 	/* define window dimensions */
-	windows[WIN_MENU]->recreate_window(wmenu_h, wmenu_w, 0, 0);
-	windows[WIN_FLDS]->recreate_window(wflds_h, wflds_w, 0, wmenu_w);
-	windows[WIN_MAIN]->recreate_window(wmain_h, wmain_w, 0,
-	    wmenu_w + wflds_w);
-	windows[WIN_CMDS]->recreate_window(WCMDS_H, wcmd_w, wmenu_h + WSTAT_H,
-	    0);
-	windows[WIN_STAT]->recreate_window(WSTAT_H, wstat_w, wmenu_h, 0);
+	windows[WIN_MENU]->recreate(wmenu_h, wmenu_w, 0, 0);
+	windows[WIN_FLDS]->recreate(wflds_h, wflds_w, 0, wmenu_w);
+	windows[WIN_MAIN]->recreate(wmain_h, wmain_w, 0, wmenu_w + wflds_w);
+	windows[WIN_CMDS]->recreate(WCMDS_H, wcmd_w, wmenu_h + WSTAT_H, 0);
+	windows[WIN_STAT]->recreate(WSTAT_H, wstat_w, wmenu_h, 0);
 }
 
 int
@@ -167,8 +165,8 @@ process_tui_events(void)
 	}
 
 end_refresh:
-	windows_draw();      /* set_borders should be called after, so that we */
-	windows_refresh();   /* we can refresh only after both are done */
+	windows_draw();
+	windows_refresh();
 
 	return code;
 }

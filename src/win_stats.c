@@ -7,7 +7,7 @@ int wstat_w;
 static WINDOW *win;
 
 static void
-stats_recreate_window(int h, int w, int y, int x)
+stats_recreate(int h, int w, int y, int x)
 {
 	if (win)
 		delwin(win);
@@ -56,10 +56,10 @@ stats_release(void)
 }
 
 static struct win stats_win_data = {
-	.recreate_window=stats_recreate_window,
-	.draw=stats_draw,
-	._refresh=stats_refresh,
-	.release=stats_release
+	.recreate = stats_recreate,
+	.draw     = stats_draw,
+	._refresh = stats_refresh,
+	.release  = stats_release
 };
 
 REGISTER_WINDOW(WIN_STAT, &stats_win_data);

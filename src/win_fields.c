@@ -7,14 +7,12 @@
 static WINDOW *win;
 
 static void
-fields_recreate_window(int h, int w, int y, int x)
+fields_recreate(int h, int w, int y, int x)
 {
-	if (win) {
+	if (win)
 		delwin(win);
-	}
 	win = newwin(h, w, y, x);
 }
-
 
 static void
 fields_draw(void)
@@ -41,12 +39,11 @@ fields_release(void)
 	win = NULL;
 }
 
-
 static struct win fields_win_data = {
-	.recreate_window=fields_recreate_window,
-	._refresh=fields_refresh,
-	.draw=fields_draw,
-	.release=fields_release
+	.recreate = fields_recreate,
+	._refresh = fields_refresh,
+	.draw     = fields_draw,
+	.release  = fields_release
 };
 
 REGISTER_WINDOW(WIN_FLDS, &fields_win_data);

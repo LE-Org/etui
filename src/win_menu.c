@@ -17,9 +17,8 @@ recreate_items_from_pvs(void)
 	/* needs to be called everytime we want to update the menu */
 	int i;
 	for (i=0; i < npvs; i++) {
-		if (mitems[i]) {
+		if (mitems[i])
 			free_item(mitems[i]);
-		}
 		mitems[i] = new_item(gpvs[i]->name, "");
 	}
 	mitems[i] = NULL;
@@ -45,15 +44,14 @@ recreate_menu(void)
 static void
 menu_set_borders()
 {
-	if (selected) {
+	if (selected)
 		box(win, 0, 0);
-	} else {
+	else
 		wborder(win,' ',' ',' ',' ',' ',' ',' ',' ');
-	}
 }
 
 static void
-menu_recreate_window(int h, int w, int y, int x)
+menu_recreate(int h, int w, int y, int x)
 {
 	if (win) {
 		unpost_menu(menu);
@@ -110,43 +108,27 @@ menu_handle_key(int c)
 {
 	switch (c) {
 	/* menu movement */
-	case KEY_DOWN: case 'j':
-		menu_driver(menu, REQ_DOWN_ITEM);
-		break;
-	case KEY_UP: case 'k':
-		menu_driver(menu, REQ_UP_ITEM);
-		break;
-	case KEY_NPAGE:
-		menu_driver(menu, REQ_SCR_DPAGE);
-		break;
-	case KEY_PPAGE:
-		menu_driver(menu, REQ_SCR_UPAGE);
-		break;
-	case 'g':
-		menu_driver(menu, REQ_FIRST_ITEM);
-		break;
-	case 'G':
-		menu_driver(menu, REQ_LAST_ITEM);
-		break;
+	case KEY_DOWN : case 'j': menu_driver(menu, REQ_DOWN_ITEM);  break;
+	case KEY_UP   : case 'k': menu_driver(menu, REQ_UP_ITEM);    break;
+	case KEY_NPAGE:           menu_driver(menu, REQ_SCR_DPAGE);  break;
+	case KEY_PPAGE:           menu_driver(menu, REQ_SCR_UPAGE);  break;
+	case 'g'      :           menu_driver(menu, REQ_FIRST_ITEM); break;
+	case 'G'      :           menu_driver(menu, REQ_LAST_ITEM);  break;
 
 	/* search in menu */
-	case 'n':
-		menu_driver(menu, REQ_NEXT_MATCH);
-		break;
-	case 'p':
-		menu_driver(menu, REQ_PREV_MATCH);
-		break;
+	case 'n':                 menu_driver(menu, REQ_NEXT_MATCH); break;
+	case 'p':                 menu_driver(menu, REQ_PREV_MATCH); break;
 	}
 }
 
 static struct win menu_win_data = {
-	.recreate_window=menu_recreate_window,
-	.draw=menu_draw,
-	._refresh=menu_refresh,
-	.release=menu_release,
-	.select=menu_select,
-	.on_data_changed=menu_data_changed,
-	.handle_key=menu_handle_key
+	.recreate        = menu_recreate,
+	.draw            = menu_draw,
+	._refresh        = menu_refresh,
+	.release         = menu_release,
+	.select          = menu_select,
+	.on_data_changed = menu_data_changed,
+	.handle_key      = menu_handle_key
 };
 
 REGISTER_WINDOW(WIN_MENU, &menu_win_data);
