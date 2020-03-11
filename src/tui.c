@@ -3,14 +3,12 @@
 #include <string.h>
 #include <assert.h>
 
+#include <ncurses.h>
+
 #include "tui.h"
 #include "win.h"
+#include "win_common.h"
 #include "win_data.h"
-#include "win_menu.h"
-#include "win_fields.h"
-#include "win_main.h"
-#include "win_cmds.h"
-#include "win_stats.h"
 
 #define WSTAT_H 1
 #define WCMDS_H 1
@@ -20,6 +18,8 @@
 #define TOTAL_FRAC (WMENU_FRAC + WFLDS_FRAC + WMAIN_FRAC)
 
 #define NC_TIMEOUT 50
+
+struct wc wc; /* definiton of win_common's struct wc */
 
 static void
 recreate_windows()
@@ -125,6 +125,7 @@ process_tui_events(void)
 	}
 
 	windows_handle_key(c);
+	windows_handle_passive();
 
 	if (want_quit)
 		return C_QUIT;

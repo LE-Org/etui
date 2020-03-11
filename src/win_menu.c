@@ -1,9 +1,13 @@
+#include <regex.h>
+
 #include <curses.h>
+#include <menu.h>
+
 #include "win.h"
 #include "win_data.h"
-#include "win_menu.h"
+#include "win_common.h"
 
-MENU *menu;
+static MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
 static WINDOW *win;
 
@@ -105,6 +109,46 @@ menu_handle_key(int c)
 	case 'g'      :           menu_driver(menu, REQ_FIRST_ITEM); break;
 	case 'G'      :           menu_driver(menu, REQ_LAST_ITEM);  break;
 	}
+
+	/* update common data */
+	wc.toprow = top_row(menu);
+	wc.sel_pv = item_name(current_item(menu));
+	wc.sel_pv_i = item_index(current_item(menu));
+}
+
+static int
+search_as_you_type(void)
+{
+	int i, off, n;
+	ITEM *item, *match;
+	regex_t preg;
+
+	n = item_count(menu);
+	off = item_index(current_item(menu));
+
+	regcomp(&preg, wc.cmd, REG_NOSUB | REG_EXTENDED);
+
+	match = NULL;
+	for (i = 0; i < n; ++i) {
+		item = menu->items[(i+off)%n];
+		if (regexec(&preg, item->name.str,0,0,0) == 0) {
+			match = item;
+			break;
+		}
+	}
+	regfree(&preg);
+
+	if (match)
+		set_current_item(menu, match);
+
+	return 0;
+}
+
+static void
+menu_handle_passive(void)
+{
+	if (win_flags & F_WCMDS_SRCH)
+		search_as_you_type();
 }
 
 static struct win menu_win_data = {
@@ -113,7 +157,8 @@ static struct win menu_win_data = {
 	._refresh        = menu_refresh,
 	.release         = menu_release,
 	.on_data_changed = menu_data_changed,
-	.handle_key      = menu_handle_key
+	.handle_key      = menu_handle_key,
+	.handle_passive  = menu_handle_passive
 };
 
 REGISTER_WINDOW(WIN_MENU, &menu_win_data);

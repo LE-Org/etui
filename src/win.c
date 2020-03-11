@@ -67,3 +67,13 @@ windows_handle_key(int c)
 			windows[i]->handle_key(c);
 	}
 }
+
+void
+windows_handle_passive(void)
+{
+	int i;
+	for (i=0; i < n_windows; i++) {
+		if (windows[i] && windows[i]->handle_passive)
+			windows[i]->handle_passive();
+	}
+}

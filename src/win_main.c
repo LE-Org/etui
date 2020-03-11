@@ -1,9 +1,7 @@
 #include <curses.h>
-#include <menu.h>
 #include "win.h"
-#include "win_main.h"
+#include "win_common.h"
 #include "win_data.h"
-#include "win_menu.h"
 
 static WINDOW *win;
 
@@ -43,18 +41,16 @@ set_borders(void)
 static void
 main_draw(void)
 {
-	if (top_row(menu) == -1)
+	if (wc.toprow == -1)
 		return;
 
 	werase(win);
 
 	switch (win_flags & F_TAB_MASK) {
 	case F_TAB(1):
-		mvwaddstr(win, 1, 1, item_name(current_item(menu)));
-		mvwprintw(win, 2, 1, "%d.",
-			  item_index(current_item(menu)));
-		mvwprintw(win, 3, 1, "VAL = %s",
-			  gpvs[item_index(current_item(menu))]->value);
+		mvwaddstr(win, 1, 1, wc.sel_pv);
+		mvwprintw(win, 2, 1, "%d.", wc.sel_pv_i);
+		mvwprintw(win, 3, 1, "VAL = %s", gpvs[wc.sel_pv_i]->value);
 		break;
 	case F_TAB(2):
 		mvwprintw(win, 1, 1, "TAB2");

@@ -1,14 +1,13 @@
 #include <string.h>
-#include <curses.h>
-#include <menu.h>
 #include <regex.h>
-#include "win.h"
-#include "win_cmds.h"
-#include "win_data.h"
-#include "win_menu.h"
-#include "win_stats.h"
 
-static char cmd[MAX_CMD];
+#include <curses.h>
+
+#include "win.h"
+#include "win_common.h"
+#include "win_data.h"
+
+static char *cmd = wc.cmd; /* wc.cmd alias */
 static char visible = 0;
 static WINDOW *win;
 
@@ -58,34 +57,6 @@ cmds_visible(int status)
 	if (!status)
 		wclear(win);
 	visible = status;
-}
-
-static int
-search_as_you_type(void)
-{
-	int i, off, n;
-	ITEM *item, *match;
-	regex_t preg;
-
-	n = item_count(menu);
-	off = item_index(current_item(menu));
-
-	regcomp(&preg, cmd, REG_NOSUB | REG_EXTENDED);
-
-	match = NULL;
-	for (i = 0; i < n; ++i) {
-		item = menu->items[(i+off)%n];
-		if (regexec(&preg, item->name.str,0,0,0) == 0) {
-			match = item;
-			break;
-		}
-	}
-	regfree(&preg);
-
-	if (match)
-		set_current_item(menu, match);
-
-	return 0;
 }
 
 static int
@@ -141,9 +112,6 @@ cmds_handle_key(int c)
 			cmd[i++] = c;
 		}
 		cmd[i] = '\0';
-
-		if (win_flags & F_WCMDS_SRCH)
-			search_as_you_type();
 	}
 }
 

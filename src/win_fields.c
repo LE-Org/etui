@@ -1,8 +1,7 @@
 #include <curses.h>
-#include <menu.h>
 #include "win.h"
+#include "win_common.h"
 #include "win_data.h"
-#include "win_menu.h"
 
 static WINDOW *win;
 
@@ -19,11 +18,11 @@ fields_draw(void)
 {
 	int i;
 
-	if (top_row(menu) == -1)
+	if (wc.toprow == -1)
 		return;
 
-	for (i = 0; i < menu_h && (i+top_row(menu)) < npvs; ++i)
-		mvwprintw(win, i+1, 1, "%s", gpvs[i+top_row(menu)]->value);
+	for (i = 0; i < menu_h && (i+wc.toprow) < npvs; ++i)
+		mvwprintw(win, i+1, 1, "%s", gpvs[i+wc.toprow]->value);
 }
 
 static void
