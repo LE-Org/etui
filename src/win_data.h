@@ -16,11 +16,24 @@
 #define F_WCMDS_CMDS   0x0020 /* win_cmds is in command mode */
 #define F_TAB(n)      (0x0100 << ((n)-1)) /* one based */
 
+#define MAX_BUF 100
+
+struct wc {
+	int  win_flags;
+	char srch[MAX_BUF];
+	char cmd[MAX_BUF];
+	const char *sel_pv;
+	int  sel_pv_i;
+	int  toprow;
+};
+
+extern struct wc wc;
+
 extern int wmenu_h, wmenu_w;
 extern int wflds_h, wflds_w;
 extern int wmain_h, wmain_w;
 extern int wstat_h, wstat_w;
-extern int wcmd_h, wcmd_w;
+extern int wcmds_h, wcmds_w;
 extern int menu_h, menu_w;
 
 extern int want_quit;

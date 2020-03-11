@@ -35,12 +35,8 @@ void
 windows_select(int win_id)
 {
 	int i;
-
-	if (!windows[win_id])
-		return;
 	for (i=0; i < n_windows; i++)
-		if(windows[i])
-			windows[i]->selected = 0;
+		windows[i]->selected = 0;
 	windows[win_id]->selected = 1;
 }
 
@@ -69,5 +65,15 @@ windows_handle_key(int c)
 		if (windows[i] && windows[i]->handle_key &&
 		    windows[i]->selected)
 			windows[i]->handle_key(c);
+	}
+}
+
+void
+windows_handle_passive(void)
+{
+	int i;
+	for (i=0; i < n_windows; i++) {
+		if (windows[i] && windows[i]->handle_passive)
+			windows[i]->handle_passive();
 	}
 }

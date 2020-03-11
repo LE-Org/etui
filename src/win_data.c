@@ -6,9 +6,10 @@ int wmenu_h, wmenu_w;
 int wflds_h, wflds_w;
 int wmain_h, wmain_w;
 int wstat_h, wstat_w;
-int wcmd_h, wcmd_w;
+int wcmds_h, wcmds_w;
 int menu_h, menu_w;
 
+struct wc wc;
 int want_quit = 0;
 unsigned win_flags = 0 | F_TAB(1);
 int npvs = 0;

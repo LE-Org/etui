@@ -1,14 +1,12 @@
 #include <string.h>
-#include <curses.h>
-#include <menu.h>
 #include <regex.h>
-#include "win.h"
-#include "win_cmds.h"
-#include "win_data.h"
-#include "win_menu.h"
-#include "win_stats.h"
 
-static char cmd[MAX_CMD];
+#include <curses.h>
+
+#include "win.h"
+#include "win_data.h"
+
+static char *cmd = wc.cmd; /* wc.cmd alias */
 static char visible = 0;
 static WINDOW *win;
 
@@ -23,6 +21,26 @@ cmds_recreate(int h, int w, int y, int x)
 static void
 cmds_draw(void)
 {
+	char *sol; /* start of line, adjust for wcmds_w cmd overflow */
+	char *inp;
+
+	if (win_flags & F_WCMDS_SRCH)
+		inp = wc.srch;
+	else
+		inp = wc.cmd;
+
+	/* if strlen is less or equal to what fits, don't shift */
+	sol = inp + strlen(inp) - (wcmds_w - 2);
+	if (sol < inp)
+		sol = inp;
+
+	wmove(win, 0, 0);
+	wclrtoeol(win);
+	if (win_flags & F_WCMDS_CMDS)
+		waddch(win, ':');
+	else if (win_flags & F_WCMDS_SRCH)
+		waddch(win, '/');
+	waddnstr(win, sol, wcmds_w - 2);
 }
 
 static void
@@ -41,66 +59,9 @@ cmds_release(void)
 static void
 cmds_visible(int status)
 {
-	if (status) {
-		if (win_flags & F_WCMDS_CMDS) {
-			cmd[0] = '\0';
-			mvwaddch(win, 0, 0, ':');
-		} else if (win_flags & F_WCMDS_SRCH) {
-			cmd[0] = '\0';
-			mvwaddch(win, 0, 0, '/');
-		}
-	} else {
+	if (!status)
 		wclear(win);
-	}
 	visible = status;
-}
-
-static int
-wcmds_search(void)
-{
-	int i, off, n;
-	ITEM *item, *match;
-	regex_t preg;
-
-	n = item_count(menu);
-	off = item_index(current_item(menu));
-
-	regcomp(&preg, cmd, REG_NOSUB | REG_EXTENDED);
-
-	match = NULL;
-	for (i = 0; i < n; ++i) {
-		item = menu->items[(i+off)%n];
-		if (regexec(&preg, item->name.str,0,0,0) == 0) {
-			match = item;
-			break;
-		}
-	}
-	regfree(&preg);
-
-	if (match)
-		set_current_item(menu, match);
-
-	/* update search field, but leave '/' character alone */
-	wmove(win, 0, 1);
-	wclrtoeol(win);
-	mvwaddstr(win, 0, 1, cmd);
-
-	return 0;
-}
-
-static void
-wcmds_commands(void)
-{
-	char *sol; /* start of line, adjust for wstat_w cmd overflow */
-
-	/* if strlen is less or equal to what fits, don't shift */
-	sol = cmd + strlen(cmd) - (wstat_w - 2);
-	if (sol < cmd)
-		sol = cmd;
-
-	wmove(win, 0, 1);
-	wclrtoeol(win);
-	mvwaddnstr(win, 0, 1, sol, wstat_w - 2);
 }
 
 static int
@@ -130,22 +91,28 @@ cmds_handle_key(int c)
 {
 	static int i = 0;
 	int code = 0;
+	char *inp;
+
+	if (win_flags & F_WCMDS_SRCH)
+		inp = wc.srch;
+	else
+		inp = wc.cmd;
 
 	if (!visible)
 		return;
 
 	if (c == '\n') { /* confirm */
-		switch (win_flags & TUI_WCMDS_MASK) {
-		case F_WCMDS_CMDS: code = process_cmd(); break;
-		case F_WCMDS_SRCH: break; /* search as-you-type */
-		}
+		if (win_flags & F_WCMDS_CMDS)
+			code = process_cmd();
+
 		if (code) {
 			return;
 		}
 	}
 
 	if ((win_flags & F_KEY_ESC) || c == '\n') { /* cancel/finish */
-		cmd[i=0] = '\0';
+		if (win_flags & (F_KEY_ESC | F_WCMDS_CMDS))
+			inp[i=0] = '\0';
 		win_flags &= ~TUI_WCMDS_MASK;
 		windows_visible(WIN_CMDS, 0);
 		windows_select(WIN_MENU);
@@ -153,15 +120,10 @@ cmds_handle_key(int c)
 		if (c == KEY_BACKSPACE) {
 			if (--i < 0)
 				i = 0;
-		} else if (i < MAX_CMD-1) {
-			cmd[i++] = c;
+		} else if (i < MAX_BUF-1) {
+			inp[i++] = c;
 		}
-		cmd[i] = '\0';
-
-		switch (win_flags & TUI_WCMDS_MASK) {
-		case F_WCMDS_CMDS: wcmds_commands(); break;
-		case F_WCMDS_SRCH: wcmds_search(); break;
-		}
+		inp[i] = '\0';
 	}
 }
 
