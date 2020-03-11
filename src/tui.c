@@ -6,7 +6,6 @@
 
 #include "tui.h"
 #include "win.h"
-#include "win_common.h"
 #include "win_data.h"
 
 #define WSTAT_H 1
@@ -17,8 +16,6 @@
 #define TOTAL_FRAC (WMENU_FRAC + WFLDS_FRAC + WMAIN_FRAC)
 
 #define NC_TIMEOUT 50
-
-struct wc wc; /* definiton of win_common's struct wc */
 
 static void
 recreate_windows()

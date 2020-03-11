@@ -9,6 +9,7 @@ int wstat_h, wstat_w;
 int wcmds_h, wcmds_w;
 int menu_h, menu_w;
 
+struct wc wc;
 int want_quit = 0;
 unsigned win_flags = 0 | F_TAB(1);
 int npvs = 0;

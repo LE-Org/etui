@@ -1,6 +1,5 @@
 #include <curses.h>
 #include "win.h"
-#include "win_common.h"
 #include "win_data.h"
 
 static WINDOW *win;

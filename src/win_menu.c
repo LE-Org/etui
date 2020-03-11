@@ -5,7 +5,6 @@
 
 #include "win.h"
 #include "win_data.h"
-#include "win_common.h"
 
 static MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];

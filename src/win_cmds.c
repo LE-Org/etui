@@ -4,7 +4,6 @@
 #include <curses.h>
 
 #include "win.h"
-#include "win_common.h"
 #include "win_data.h"
 
 static char *cmd = wc.cmd; /* wc.cmd alias */
