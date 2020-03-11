@@ -11,6 +11,8 @@ static MENU *menu;
 static ITEM *mitems[MAX_N_ENTRIES + 1];
 static WINDOW *win;
 
+static int search(int off, int dir);
+
 static void
 recreate_items_from_pvs(void)
 {
@@ -108,6 +110,9 @@ menu_handle_key(int c)
 	case KEY_PPAGE:           menu_driver(menu, REQ_SCR_UPAGE);  break;
 	case 'g'      :           menu_driver(menu, REQ_FIRST_ITEM); break;
 	case 'G'      :           menu_driver(menu, REQ_LAST_ITEM);  break;
+	/* search next/previous */
+	case 'n': search(1,1); break;
+	case 'p': search(-1,-1); break;
 	}
 
 	/* update common data */
@@ -117,20 +122,20 @@ menu_handle_key(int c)
 }
 
 static int
-search_as_you_type(void)
+search(int off, int dir)
 {
-	int i, off, n;
+	int i, n;
 	ITEM *item, *match;
 	regex_t preg;
 
 	n = item_count(menu);
-	off = item_index(current_item(menu));
+	off += item_index(current_item(menu));
 
 	regcomp(&preg, wc.srch, REG_NOSUB | REG_EXTENDED);
 
 	match = NULL;
 	for (i = 0; i < n; ++i) {
-		item = menu->items[(i+off)%n];
+		item = menu->items[(n+dir*i+off)%n];
 		if (regexec(&preg, item->name.str,0,0,0) == 0) {
 			match = item;
 			break;
@@ -148,7 +153,7 @@ static void
 menu_handle_passive(void)
 {
 	if (win_flags & F_WCMDS_SRCH)
-		search_as_you_type();
+		search(0,1); /* search as you type */
 }
 
 static struct win menu_win_data = {
