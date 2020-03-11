@@ -23,6 +23,20 @@ cmds_recreate(int h, int w, int y, int x)
 static void
 cmds_draw(void)
 {
+	char *sol; /* start of line, adjust for wcmds_w cmd overflow */
+
+	/* if strlen is less or equal to what fits, don't shift */
+	sol = cmd + strlen(cmd) - (wcmds_w - 2);
+	if (sol < cmd)
+		sol = cmd;
+
+	wmove(win, 0, 0);
+	wclrtoeol(win);
+	if (win_flags & F_WCMDS_CMDS)
+		waddch(win, ':');
+	else if (win_flags & F_WCMDS_SRCH)
+		waddch(win, '/');
+	waddnstr(win, sol, wcmds_w - 2);
 }
 
 static void
@@ -41,17 +55,8 @@ cmds_release(void)
 static void
 cmds_visible(int status)
 {
-	if (status) {
-		if (win_flags & F_WCMDS_CMDS) {
-			cmd[0] = '\0';
-			mvwaddch(win, 0, 0, ':');
-		} else if (win_flags & F_WCMDS_SRCH) {
-			cmd[0] = '\0';
-			mvwaddch(win, 0, 0, '/');
-		}
-	} else {
+	if (!status)
 		wclear(win);
-	}
 	visible = status;
 }
 
@@ -80,27 +85,12 @@ wcmds_search(void)
 	if (match)
 		set_current_item(menu, match);
 
-	/* update search field, but leave '/' character alone */
-	wmove(win, 0, 1);
-	wclrtoeol(win);
-	mvwaddstr(win, 0, 1, cmd);
-
 	return 0;
 }
 
 static void
 wcmds_commands(void)
 {
-	char *sol; /* start of line, adjust for wstat_w cmd overflow */
-
-	/* if strlen is less or equal to what fits, don't shift */
-	sol = cmd + strlen(cmd) - (wstat_w - 2);
-	if (sol < cmd)
-		sol = cmd;
-
-	wmove(win, 0, 1);
-	wclrtoeol(win);
-	mvwaddnstr(win, 0, 1, sol, wstat_w - 2);
 }
 
 static int
