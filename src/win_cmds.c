@@ -23,11 +23,17 @@ static void
 cmds_draw(void)
 {
 	char *sol; /* start of line, adjust for wcmds_w cmd overflow */
+	char *inp;
+
+	if (win_flags & F_WCMDS_SRCH)
+		inp = wc.srch;
+	else
+		inp = wc.cmd;
 
 	/* if strlen is less or equal to what fits, don't shift */
-	sol = cmd + strlen(cmd) - (wcmds_w - 2);
-	if (sol < cmd)
-		sol = cmd;
+	sol = inp + strlen(inp) - (wcmds_w - 2);
+	if (sol < inp)
+		sol = inp;
 
 	wmove(win, 0, 0);
 	wclrtoeol(win);
@@ -86,6 +92,12 @@ cmds_handle_key(int c)
 {
 	static int i = 0;
 	int code = 0;
+	char *inp;
+
+	if (win_flags & F_WCMDS_SRCH)
+		inp = wc.srch;
+	else
+		inp = wc.cmd;
 
 	if (!visible)
 		return;
@@ -100,7 +112,8 @@ cmds_handle_key(int c)
 	}
 
 	if ((win_flags & F_KEY_ESC) || c == '\n') { /* cancel/finish */
-		cmd[i=0] = '\0';
+		if (win_flags & (F_KEY_ESC | F_WCMDS_CMDS))
+			inp[i=0] = '\0';
 		win_flags &= ~TUI_WCMDS_MASK;
 		windows_visible(WIN_CMDS, 0);
 		windows_select(WIN_MENU);
@@ -108,10 +121,10 @@ cmds_handle_key(int c)
 		if (c == KEY_BACKSPACE) {
 			if (--i < 0)
 				i = 0;
-		} else if (i < MAX_CMD-1) {
-			cmd[i++] = c;
+		} else if (i < MAX_BUF-1) {
+			inp[i++] = c;
 		}
-		cmd[i] = '\0';
+		inp[i] = '\0';
 	}
 }
 

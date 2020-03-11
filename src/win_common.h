@@ -1,9 +1,8 @@
-#define MAX_CMD 100
-#define MAX_SRCH 100
+#define MAX_BUF 100
 struct wc {
 	int  win_flags;
-	char srch[MAX_SRCH];
-	char cmd[MAX_CMD];
+	char srch[MAX_BUF];
+	char cmd[MAX_BUF];
 	const char *sel_pv;
 	int  sel_pv_i;
 	int  toprow;

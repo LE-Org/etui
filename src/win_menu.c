@@ -126,7 +126,7 @@ search_as_you_type(void)
 	n = item_count(menu);
 	off = item_index(current_item(menu));
 
-	regcomp(&preg, wc.cmd, REG_NOSUB | REG_EXTENDED);
+	regcomp(&preg, wc.srch, REG_NOSUB | REG_EXTENDED);
 
 	match = NULL;
 	for (i = 0; i < n; ++i) {
