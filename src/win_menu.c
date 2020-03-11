@@ -78,7 +78,6 @@ static void
 menu_release()
 {
 	int i;
-	/* clean up */
 	for (i = 0; i < npvs; ++i)
 		free_item(mitems[i]);
 
