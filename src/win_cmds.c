@@ -61,7 +61,7 @@ cmds_visible(int status)
 }
 
 static int
-wcmds_search(void)
+search_as_you_type(void)
 {
 	int i, off, n;
 	ITEM *item, *match;
@@ -86,11 +86,6 @@ wcmds_search(void)
 		set_current_item(menu, match);
 
 	return 0;
-}
-
-static void
-wcmds_commands(void)
-{
 }
 
 static int
@@ -125,10 +120,9 @@ cmds_handle_key(int c)
 		return;
 
 	if (c == '\n') { /* confirm */
-		switch (win_flags & TUI_WCMDS_MASK) {
-		case F_WCMDS_CMDS: code = process_cmd(); break;
-		case F_WCMDS_SRCH: break; /* search as-you-type */
-		}
+		if (win_flags & F_WCMDS_CMDS)
+			code = process_cmd();
+
 		if (code) {
 			return;
 		}
@@ -148,10 +142,8 @@ cmds_handle_key(int c)
 		}
 		cmd[i] = '\0';
 
-		switch (win_flags & TUI_WCMDS_MASK) {
-		case F_WCMDS_CMDS: wcmds_commands(); break;
-		case F_WCMDS_SRCH: wcmds_search(); break;
-		}
+		if (win_flags & F_WCMDS_SRCH)
+			search_as_you_type();
 	}
 }
 
