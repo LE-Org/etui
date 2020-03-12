@@ -6,7 +6,6 @@
 #include "win.h"
 #include "win_data.h"
 
-static char *cmd = wc.cmd; /* wc.cmd alias */
 static char visible = 0;
 static WINDOW *win;
 
@@ -24,18 +23,23 @@ cmds_draw(void)
 	char *sol; /* start of line, adjust for wcmds_w cmd overflow */
 	char *inp;
 
+	wmove(win, 0, 0);
+	wclrtoeol(win);
+
+	/* quit if win not active */
+	if (!(win_flags & TUI_WCMDS_MASK))
+		return;
+
 	if (win_flags & F_WCMDS_SRCH)
 		inp = wc.srch;
 	else
 		inp = wc.cmd;
 
-	/* if strlen is less or equal to what fits, don't shift */
+	/* if strlen <= win_width, don't shift */
 	sol = inp + strlen(inp) - (wcmds_w - 2);
 	if (sol < inp)
 		sol = inp;
 
-	wmove(win, 0, 0);
-	wclrtoeol(win);
 	if (win_flags & F_WCMDS_CMDS)
 		waddch(win, ':');
 	else if (win_flags & F_WCMDS_SRCH)
@@ -69,7 +73,7 @@ process_cmd(void)
 {
 	char *cmd_;
 
-	cmd_ = strtok(cmd, " \t");
+	cmd_ = strtok(wc.cmd, " \t");
 
 	if (!cmd_)
 		return 0;
@@ -86,44 +90,50 @@ process_cmd(void)
 	return 0;
 }
 
+static int
+add_key_to_buffer(int c, char *buf, int *pi) {
+	if ((win_flags & F_KEY_ESC) || c == '\n') { /* cancel/confirm */
+		if (c == '\n')
+			return 1; /* confirm (enter) */
+		return 2; /* cancel (escape) */
+	} else {
+		if (c == KEY_BACKSPACE) {
+			if (--(*pi) < 0)
+				*pi = 0;
+		} else if (*pi < MAX_BUF-1) {
+			buf[(*pi)++] = c;
+		}
+		buf[*pi] = '\0';
+	}
+
+	return 0;
+}
+
 static void
 cmds_handle_key(int c)
 {
-	static int i = 0;
-	int code = 0;
-	char *inp;
+	static int si = 0; /* search index */
+	static int ci = 0; /* command index */
+	int ret = 0;
 
-	if (win_flags & F_WCMDS_SRCH)
-		inp = wc.srch;
-	else
-		inp = wc.cmd;
-
-	if (!visible)
-		return;
-
-	if (c == '\n') { /* confirm */
-		if (win_flags & F_WCMDS_CMDS)
-			code = process_cmd();
-
-		if (code) {
-			return;
-		}
+	switch (win_flags & TUI_WCMDS_MASK) {
+	case F_WCMDS_SRCH: /* search mode */
+		ret = add_key_to_buffer(c, wc.srch, &si);
+		if (ret == 2)
+			wc.srch[si=0] = '\0';
+		break;
+	case F_WCMDS_CMDS: /* command mode */
+		ret = add_key_to_buffer(c, wc.cmd, &ci);
+		if (ret == 1)
+			process_cmd();
+		if (ret == 1 || ret == 2)
+			wc.cmd[ci=0] = '\0';
+		break;
 	}
 
-	if ((win_flags & F_KEY_ESC) || c == '\n') { /* cancel/finish */
-		if (win_flags & (F_KEY_ESC | F_WCMDS_CMDS))
-			inp[i=0] = '\0';
+	if (ret) {
 		win_flags &= ~TUI_WCMDS_MASK;
-		windows_visible(WIN_CMDS, 0);
 		windows_select(WIN_MENU);
-	} else {
-		if (c == KEY_BACKSPACE) {
-			if (--i < 0)
-				i = 0;
-		} else if (i < MAX_BUF-1) {
-			inp[i++] = c;
-		}
-		inp[i] = '\0';
 	}
 }
 
